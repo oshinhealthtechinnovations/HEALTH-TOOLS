@@ -151,41 +151,58 @@ h1, h2, h3, h4, h5, h6 {
   color: #FFFFFF;
 }
 
-/* CARD CLEAN SYSTEM */
+/* CARD CLEAN SYSTEM & HOVER EFFECTS */
 .card-clean {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
+  border-radius: 0.85rem;
   box-shadow: var(--shadow-sm);
   width: 100%;
+  transition: all 0.25s ease-in-out;
 }
 
+.card-clean:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+}
+
+/* RICH STAT OVERVIEW CARDS */
 .stat-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
+  border-radius: 0.85rem;
   padding: 1.25rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.1rem;
   box-shadow: var(--shadow-sm);
   width: 100%;
+  transition: all 0.25s ease-in-out;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+  border-color: #CBD5E1;
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 0.5rem;
-  background-color: var(--primary-green-light);
-  color: var(--primary-green);
+  width: 52px;
+  height: 52px;
+  border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
+  flex-shrink: 0;
 }
 
+.stat-icon-blue { background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); color: #2563EB; border: 1px solid #BFDBFE; }
+.stat-icon-green { background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); color: #059669; border: 1px solid #A7F3D0; }
+.stat-icon-amber { background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); color: #D97706; border: 1px solid #FDE68A; }
+.stat-icon-purple { background: linear-gradient(135deg, #F5F3FF 0%, #DDD6FE 100%); color: #7C3AED; border: 1px solid #C4B5FD; }
+
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 800;
   color: var(--text-dark);
   line-height: 1.1;
@@ -195,7 +212,46 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-muted);
+  margin-top: 0.15rem;
 }
+
+/* AVATAR BADGE FOR PATIENT LIST */
+.patient-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ECFDF5;
+  color: #059669;
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #A7F3D0;
+  flex-shrink: 0;
+}
+
+/* CUSTOM PROGRESS BARS FOR RISK FACTORS */
+.custom-progress-bg {
+  background-color: #F1F5F9;
+  border-radius: 9999px;
+  height: 10px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.custom-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fill-red { background: linear-gradient(90deg, #EF4444 0%, #DC2626 100%); }
+.fill-amber { background: linear-gradient(90deg, #F59E0B 0%, #D97706 100%); }
+.fill-blue { background: linear-gradient(90deg, #3B82F6 0%, #2563EB 100%); }
+.fill-green { background: linear-gradient(90deg, #10B981 0%, #059669 100%); }
+.fill-purple { background: linear-gradient(90deg, #8B5CF6 0%, #7C3AED 100%); }
 
 /* NATIVE HTML LABEL GOAL SELECTION CARDS */
 .goal-card-select {

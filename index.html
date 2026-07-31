@@ -44,31 +44,31 @@
       <ul class="nav-menu">
         <li>
           <a href="#" class="nav-tab-link active" data-tab="dashboard">
-            <i class="lucide-layout-dashboard"></i>
+            <i data-lucide="layout-dashboard"></i>
             <span>Camp Dashboard</span>
           </a>
         </li>
         <li>
           <a href="#" class="nav-tab-link" data-tab="assessment">
-            <i class="lucide-user-plus"></i>
+            <i data-lucide="user-plus"></i>
             <span>New Assessment</span>
           </a>
         </li>
         <li>
           <a href="#" class="nav-tab-link" data-tab="patients">
-            <i class="lucide-users"></i>
+            <i data-lucide="users"></i>
             <span>Patient Directory</span>
           </a>
         </li>
         <li>
           <a href="#" class="nav-tab-link" data-tab="report">
-            <i class="lucide-file-badge"></i>
+            <i data-lucide="file-badge"></i>
             <span>Printable Report</span>
           </a>
         </li>
         <li>
           <a href="#" class="nav-tab-link" data-tab="admin">
-            <i class="lucide-settings"></i>
+            <i data-lucide="settings"></i>
             <span>Admin & Data Export</span>
           </a>
         </li>
@@ -76,7 +76,7 @@
 
       <div class="mt-auto pt-3 border-top border-slate-200">
         <div class="d-flex align-items-center gap-2 text-muted extra-small">
-          <i class="lucide-shield-check text-success"></i>
+          <i data-lucide="shield-check" class="text-success"></i>
           <span>WHO & ICMR-NIN Guidelines</span>
         </div>
       </div>
@@ -93,10 +93,10 @@
         </div>
         <div class="d-flex align-items-center gap-2">
           <button class="btn btn-outline-success btn-md fw-600 shadow-sm" onclick="DatabaseManager.exportToExcel()">
-            <i class="lucide-file-spreadsheet me-1"></i> Export Excel Database
+            <i data-lucide="file-spreadsheet" class="me-1"></i> Export Excel Database
           </button>
           <button class="btn btn-success btn-md fw-600 shadow-sm" onclick="App.switchTab('assessment')">
-            <i class="lucide-plus me-1"></i> + New Assessment
+            <i data-lucide="plus" class="me-1"></i> + New Assessment
           </button>
         </div>
       </header>
@@ -108,7 +108,7 @@
         <div class="row g-3 mb-4">
           <div class="col-md-3 col-6">
             <div class="stat-card">
-              <div class="stat-icon"><i class="lucide-users"></i></div>
+              <div class="stat-icon stat-icon-blue"><i data-lucide="users"></i></div>
               <div>
                 <div class="stat-value" id="stat-total">0</div>
                 <div class="stat-label">Total Screened</div>
@@ -117,27 +117,27 @@
           </div>
           <div class="col-md-3 col-6">
             <div class="stat-card">
-              <div class="stat-icon"><i class="lucide-calendar-check"></i></div>
+              <div class="stat-icon stat-icon-green"><i data-lucide="calendar-check"></i></div>
               <div>
-                <div class="stat-value" id="stat-today">0</div>
+                <div class="stat-value text-success" id="stat-today">0</div>
                 <div class="stat-label">Today's Assessments</div>
               </div>
             </div>
           </div>
           <div class="col-md-3 col-6">
             <div class="stat-card">
-              <div class="stat-icon"><i class="lucide-target text-success"></i></div>
+              <div class="stat-icon stat-icon-amber"><i data-lucide="target"></i></div>
               <div>
-                <div class="stat-value text-success" id="stat-top-goal">--</div>
+                <div class="stat-value text-warning-emphasis" id="stat-top-goal">--</div>
                 <div class="stat-label">Top Consultation Goal</div>
               </div>
             </div>
           </div>
           <div class="col-md-3 col-6">
             <div class="stat-card">
-              <div class="stat-icon"><i class="lucide-heart-pulse"></i></div>
+              <div class="stat-icon stat-icon-purple"><i data-lucide="heart-pulse"></i></div>
               <div>
-                <div class="stat-value" id="stat-avg-bmi">0.0</div>
+                <div class="stat-value text-purple" id="stat-avg-bmi">0.0</div>
                 <div class="stat-label">Average BMI</div>
               </div>
             </div>
@@ -434,7 +434,7 @@
                   ← Back to Patient Inputs
                 </button>
                 <button type="button" class="btn btn-success btn-lg px-5 fw-700 shadow-sm" onclick="AssessmentModule.saveAssessment()">
-                  <i class="lucide-save me-1"></i> Save Assessment & Generate Consultation Report
+                  <i data-lucide="save" class="me-1"></i> Save Assessment & Generate Consultation Report
                 </button>
               </div>
             </div>
@@ -469,7 +469,7 @@
             </div>
             <div class="col-md-3 text-end">
               <button class="btn btn-outline-success w-100 fw-600" onclick="DatabaseManager.exportToExcel()">
-                <i class="lucide-download me-1"></i> Export to Excel (.xlsx)
+                <i data-lucide="download" class="me-1"></i> Export to Excel (.xlsx)
               </button>
             </div>
           </div>
@@ -510,10 +510,10 @@
           </button>
           <div class="d-flex gap-2">
             <button class="btn btn-primary btn-sm fw-600" onclick="ReportModule.printReport()">
-              <i class="lucide-printer me-1"></i> Print One-Page Report
+              <i data-lucide="printer" class="me-1"></i> Print One-Page Report
             </button>
             <button class="btn btn-success btn-sm fw-600" onclick="ReportModule.downloadPDF()">
-              <i class="lucide-file-down me-1"></i> Download PDF
+              <i data-lucide="file-down" class="me-1"></i> Download PDF
             </button>
           </div>
         </div>
@@ -528,7 +528,7 @@
         <div class="row g-4">
           <div class="col-md-6">
             <div class="card-clean p-4 h-100">
-              <h5 class="fw-bold text-success mb-3"><i class="lucide-database me-2"></i>Data Management & Excel Export</h5>
+              <h5 class="fw-bold text-success mb-3"><i data-lucide="database" class="me-2"></i>Data Management & Excel Export</h5>
               <p class="text-muted small mb-4">Export patient records for health camp reporting, research, or Microsoft Excel analysis.</p>
 
               <div class="d-grid gap-3">
@@ -537,7 +537,7 @@
                     <strong class="d-block">Export Excel Workbook (.xlsx)</strong>
                     <small class="text-white-50">Appends all patient screening data into clean Excel rows</small>
                   </div>
-                  <i class="lucide-file-spreadsheet fs-2"></i>
+                  <i data-lucide="file-spreadsheet" class="fs-2"></i>
                 </button>
 
                 <button class="btn btn-outline-secondary text-start d-flex align-items-center justify-content-between" onclick="DatabaseManager.exportToCSV()">
@@ -545,7 +545,7 @@
                     <strong class="d-block">Export CSV Data File</strong>
                     <small class="text-muted">Standard comma-separated format</small>
                   </div>
-                  <i class="lucide-file-text fs-2"></i>
+                  <i data-lucide="file-text" class="fs-2"></i>
                 </button>
 
                 <button class="btn btn-outline-primary text-start d-flex align-items-center justify-content-between" onclick="DatabaseManager.exportJSONBackup()">
@@ -553,7 +553,7 @@
                     <strong class="d-block">Download Complete Database Backup (JSON)</strong>
                     <small class="text-muted">Preserves all camp settings and patient history</small>
                   </div>
-                  <i class="lucide-download fs-2"></i>
+                  <i data-lucide="download" class="fs-2"></i>
                 </button>
 
                 <input type="file" id="backup-file-input" style="display: none;" accept=".json" onchange="App.handleJSONImport(event)">
@@ -562,7 +562,7 @@
                     <strong class="d-block">Restore Database from Backup</strong>
                     <small class="text-muted">Upload a previously saved JSON backup file</small>
                   </div>
-                  <i class="lucide-upload fs-2"></i>
+                  <i data-lucide="upload" class="fs-2"></i>
                 </button>
               </div>
 
@@ -571,7 +571,7 @@
               <div class="d-flex justify-content-between align-items-center">
                 <span class="text-muted small fw-600" id="admin-patient-count">0 Records Saved</span>
                 <button class="btn btn-outline-danger btn-sm fw-600" onclick="App.confirmClearAllData()">
-                  <i class="lucide-trash-2 me-1"></i> Clear All Data
+                  <i data-lucide="trash-2" class="me-1"></i> Clear All Data
                 </button>
               </div>
             </div>
@@ -579,7 +579,7 @@
 
           <div class="col-md-6">
             <div class="card-clean p-4 h-100">
-              <h5 class="fw-bold text-success mb-3"><i class="lucide-sliders me-2"></i>Health Camp & Clinic Settings</h5>
+              <h5 class="fw-bold text-success mb-3"><i data-lucide="sliders" class="me-2"></i>Health Camp & Clinic Settings</h5>
               <p class="text-muted small mb-4">Customize details printed on individual patient reports.</p>
 
               <form id="camp-settings-form">
@@ -605,7 +605,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-success w-100 fw-600 btn-lg shadow-sm">
-                  <i class="lucide-save me-1"></i> Save Settings
+                  <i data-lucide="save" class="me-1"></i> Save Settings
                 </button>
               </form>
             </div>

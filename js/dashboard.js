@@ -13,6 +13,10 @@ const DashboardModule = {
     this.renderCharts();
     this.renderRecentPatients();
     this.renderCommonIssues();
+
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
   },
 
   renderMetrics() {
@@ -117,7 +121,7 @@ const DashboardModule = {
                   const total = patients.length || 1;
                   const val = context.raw || 0;
                   const pct = Math.round((val / total) * 100);
-                  return `${context.label}: ${val} (${pct}%)`;
+                  return ` ${context.label}: ${val} (${pct}%)`;
                 }
               }
             }
@@ -172,7 +176,7 @@ const DashboardModule = {
                   const total = patients.length || 1;
                   const val = context.raw || 0;
                   const pct = Math.round((val / total) * 100);
-                  return `${context.label}: ${val} (${pct}%)`;
+                  return ` ${context.label}: ${val} (${pct}%)`;
                 }
               }
             }
@@ -233,27 +237,41 @@ const DashboardModule = {
       return;
     }
 
-    tbody.innerHTML = patients.map(p => `
-      <tr>
-        <td><strong class="text-success">${p.id}</strong></td>
-        <td>
-          <div class="fw-700 text-slate-900">${p.name}</div>
-          <small class="text-muted">${p.gender}, ${p.age} yrs</small>
-        </td>
-        <td>${p.mobile}</td>
-        <td><span class="badge bg-success-subtle text-success border border-success">${p.patientGoal || 'Lose Weight'}</span></td>
-        <td>
-          <span class="fw-700">${p.bmi}</span>
-          <br><small class="badge ${p.bmiCategoryClass}">${p.bmiCategory}</small>
-        </td>
-        <td><strong class="text-slate-900">${p.bmr} kcal</strong></td>
-        <td>
-          <button class="btn btn-sm btn-outline-success fw-600" onclick="App.viewPatientReport('${p.id}')">
-            <i class="lucide-file-text"></i> Report
-          </button>
-        </td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = patients.map(p => {
+      const initials = p.name ? p.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'PT';
+      let goalBadgeClass = 'bg-success-subtle text-success border border-success';
+      if (p.patientGoal === 'Gain Weight') goalBadgeClass = 'bg-warning-subtle text-warning-emphasis border border-warning';
+      if (p.patientGoal === 'Maintain Weight') goalBadgeClass = 'bg-primary-subtle text-primary border border-primary';
+
+      return `
+        <tr>
+          <td><strong class="text-success">${p.id}</strong></td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="patient-avatar">${initials}</div>
+              <div>
+                <div class="fw-700 text-slate-900 mb-0">${p.name}</div>
+                <small class="text-muted extra-small">${p.gender}, ${p.age} yrs</small>
+              </div>
+            </div>
+          </td>
+          <td class="fw-600 text-slate-700">${p.mobile}</td>
+          <td><span class="badge ${goalBadgeClass} px-2 py-1">${p.patientGoal || 'Lose Weight'}</span></td>
+          <td>
+            <span class="fw-700 text-dark">${p.bmi}</span>
+            <br><small class="badge ${p.bmiCategoryClass} extra-small">${p.bmiCategory}</small>
+          </td>
+          <td><strong class="text-slate-900">${p.bmr} kcal</strong></td>
+          <td>
+            <button class="btn btn-sm btn-outline-success fw-600 d-inline-flex align-items-center gap-1 shadow-sm" onclick="App.viewPatientReport('${p.id}')">
+              <i data-lucide="file-text"></i> Report
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    if (window.lucide) window.lucide.createIcons();
   },
 
   renderCommonIssues() {
@@ -264,11 +282,11 @@ const DashboardModule = {
     const total = patients.length || 1;
 
     const issues = [
-      { name: 'Low Physical Activity (Sedentary)', count: patients.filter(p => p.activity === 'Never').length, color: 'bg-danger' },
-      { name: 'Inadequate Fruit & Vegetable Intake', count: patients.filter(p => p.fruitVeg === 'Less than 2 servings/day').length, color: 'bg-warning' },
-      { name: 'Sub-optimal Daily Hydration (<4 glasses)', count: patients.filter(p => p.water && (p.water.includes('1–2 Glasses') || p.water.includes('3–4 Glasses'))).length, color: 'bg-info' },
-      { name: 'Sleep Deprivation (<6 hours)', count: patients.filter(p => p.sleep === 'Less than 6 hours').length, color: 'bg-secondary' },
-      { name: 'Overweight / Obesity Prevalence', count: patients.filter(p => p.bmi >= 23.0).length, color: 'bg-danger' }
+      { name: 'Overweight / Obesity Prevalence', count: patients.filter(p => p.bmi >= 23.0).length, fillClass: 'fill-red' },
+      { name: 'Low Physical Activity (Sedentary)', count: patients.filter(p => p.activity === 'Never').length, fillClass: 'fill-amber' },
+      { name: 'Inadequate Fruit & Vegetable Intake', count: patients.filter(p => p.fruitVeg === 'Less than 2 servings/day').length, fillClass: 'fill-purple' },
+      { name: 'Sub-optimal Daily Hydration (<4 glasses)', count: patients.filter(p => p.water && (p.water.includes('1–2 Glasses') || p.water.includes('3–4 Glasses'))).length, fillClass: 'fill-blue' },
+      { name: 'Sleep Deprivation (<6 hours)', count: patients.filter(p => p.sleep === 'Less than 6 hours').length, fillClass: 'fill-green' }
     ];
 
     issues.sort((a, b) => b.count - a.count);
@@ -276,13 +294,13 @@ const DashboardModule = {
     container.innerHTML = issues.map((iss, idx) => {
       const pct = Math.round((iss.count / total) * 100);
       return `
-        <div class="issue-item mb-3">
-          <div class="d-flex justify-content-between mb-1">
-            <span class="fw-600 text-slate-800">${idx + 1}. ${iss.name}</span>
-            <span class="badge bg-slate-100 text-slate-700 border">${iss.count} participants (${pct}%)</span>
+        <div class="issue-item mb-3 p-2 bg-slate-50 border rounded-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="fw-700 text-slate-800 extra-small">${idx + 1}. ${iss.name}</span>
+            <span class="badge bg-white text-slate-800 border fw-700 extra-small">${iss.count} participants (${pct}%)</span>
           </div>
-          <div class="progress" style="height: 8px;">
-            <div class="progress-bar ${iss.color}" role="progressbar" style="width: ${pct}%;"></div>
+          <div class="custom-progress-bg mt-1">
+            <div class="custom-progress-fill ${iss.fillClass}" style="width: ${Math.max(5, pct)}%;"></div>
           </div>
         </div>
       `;
