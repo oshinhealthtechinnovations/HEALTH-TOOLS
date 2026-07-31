@@ -1,6 +1,6 @@
 /**
  * Nutrislims Health Camp Screening Tool - Assessment Form Module
- * Handles Custom "Other (Specify...)" Write-In Inputs, 2-Step Validation, Live Calculations, and Save
+ * Handles Custom "Other (Specify...)" Write-In Inputs, 2-Step Validation, Extended Live Calculations, and Save
  */
 
 const AssessmentModule = {
@@ -165,6 +165,19 @@ const AssessmentModule = {
     const proteinVal = document.getElementById('preview-protein');
     const waterVal = document.getElementById('preview-water');
 
+    const healthScoreVal = document.getElementById('preview-health-score');
+    const healthBadge = document.getElementById('preview-health-badge');
+    const whtrVal = document.getElementById('preview-whtr');
+    const whtrStatus = document.getElementById('preview-whtr-status');
+    const bodyFatVal = document.getElementById('preview-body-fat');
+    const fatMassVal = document.getElementById('preview-fat-mass');
+
+    if (healthScoreVal) healthScoreVal.innerText = `${processed.overallHealthScore} / 100`;
+    if (healthBadge) {
+      healthBadge.innerText = processed.healthScoreStatusText;
+      healthBadge.className = `badge ${processed.healthScoreBadge}`;
+    }
+
     if (bmiVal) bmiVal.innerText = processed.bmi;
     if (bmiCat) {
       bmiCat.innerText = processed.bmiCategory;
@@ -173,6 +186,15 @@ const AssessmentModule = {
     if (healthyRange) {
       healthyRange.innerHTML = `${processed.healthyWeightRange}<br><span class="badge ${processed.weightTargetBadge} mt-1">${processed.weightTargetText}</span>`;
     }
+
+    if (whtrVal) whtrVal.innerText = processed.whtr ? processed.whtr : 'N/A';
+    if (whtrStatus) {
+      whtrStatus.innerText = processed.whtrStatus;
+      whtrStatus.className = `badge ${processed.whtrBadge}`;
+    }
+
+    if (bodyFatVal) bodyFatVal.innerText = `${processed.bodyFatPct}%`;
+    if (fatMassVal) fatMassVal.innerText = `Fat Mass: ${processed.fatMassKg} kg | LBM: ${processed.leanMassKg} kg`;
 
     if (autoGoalBadge) {
       let icon = '🥗';
