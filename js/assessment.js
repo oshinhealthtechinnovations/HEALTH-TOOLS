@@ -38,19 +38,14 @@ const AssessmentModule = {
    * Saves any in-progress draft, clears the form, and navigates to step 1.
    */
   startNewAssessment() {
-    // If there is meaningful data in the form, auto-save as draft
-    const name = document.getElementById('patient-name')?.value.trim();
-    const weight = document.getElementById('patient-weight')?.value.trim();
-    const editId = document.getElementById('patient-edit-id')?.value;
-
-    if ((name || weight) && !editId) {
-      this.saveDraft();
-      App.showToast('Draft auto-saved. Form cleared for new patient.', 'info');
-    }
-
+    // Clear any draft from memory/localStorage so new form is 100% empty
+    try { localStorage.removeItem(this._draftKey); } catch(e) {}
+    
+    // Clear all form inputs and force view back to Step 1
     this.clearForm();
     App.switchTab('assessment');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    App.showToast('Form cleared for new patient assessment.', 'info');
   },
 
   /**
@@ -86,15 +81,27 @@ const AssessmentModule = {
   },
 
   /**
-   * Completely clear the assessment form — all fields, step indicators, other-inputs.
+   * Completely clear the assessment form — all fields, step indicators, other-inputs, force Step 1.
    */
   clearForm() {
     const form = document.getElementById('assessment-form');
     if (form) form.reset();
 
-    // Clear edit ID (ensures next save is treated as NEW patient)
-    const editIdEl = document.getElementById('patient-edit-id');
-    if (editIdEl) editIdEl.value = '';
+    // Explicitly clear all input elements
+    const fieldIds = ['patient-edit-id', 'height-feet', 'height-inches', 'patient-height', 'patient-weight', 'patient-waist', 'patient-visceral-fat', 'patient-name', 'patient-age', 'patient-mobile'];
+    fieldIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+    // Reset dropdown defaults
+    if (document.getElementById('patient-gender')) document.getElementById('patient-gender').value = 'Male';
+    if (document.getElementById('patient-diet-type')) document.getElementById('patient-diet-type').value = 'Pure Vegetarian';
+    if (document.getElementById('patient-medical-condition')) document.getElementById('patient-medical-condition').value = 'None';
+    if (document.getElementById('lifestyle-activity')) document.getElementById('lifestyle-activity').value = 'Never';
+    if (document.getElementById('lifestyle-fruitveg')) document.getElementById('lifestyle-fruitveg').value = 'Less than 2 servings/day';
+    if (document.getElementById('lifestyle-water')) document.getElementById('lifestyle-water').value = '7–8 Glasses/day';
+    if (document.getElementById('lifestyle-sleep')) document.getElementById('lifestyle-sleep').value = '6–8 hours';
 
     // Hide all "Other (Specify...)" write-in fields
     const otherInputs = document.querySelectorAll('input[id$="-other"]');
@@ -103,10 +110,10 @@ const AssessmentModule = {
     // Remove any validation error highlights
     document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
-    // Clear any draft in localStorage after explicit new start
+    // Delete draft from localStorage so old data never re-populates
     try { localStorage.removeItem(this._draftKey); } catch(e) {}
 
-    // Reset to Step 1
+    // Force step indicator to Step 1
     this.currentStep = 1;
     this.updateStepUI();
   },
