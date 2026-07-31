@@ -234,6 +234,7 @@ const AssessmentModule = {
       height: document.getElementById('patient-height')?.value || '',
       weight: document.getElementById('patient-weight')?.value || '',
       waistCm: document.getElementById('patient-waist')?.value || '',
+      visceralFat: document.getElementById('patient-visceral-fat')?.value || '',
       activity: getDropdownValue('lifestyle-activity', 'lifestyle-activity-other') || 'Never',
       fruitVeg: getDropdownValue('lifestyle-fruitveg', 'lifestyle-fruitveg-other') || 'Less than 2 servings/day',
       water: getDropdownValue('lifestyle-water', 'lifestyle-water-other') || '7–8 Glasses/day',

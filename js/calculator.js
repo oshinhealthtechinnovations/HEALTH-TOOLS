@@ -343,7 +343,107 @@ const ClinicalCalculator = {
   },
 
   /**
-   * Complete Assessment Calculation Pipeline (v2.0 — Clinically Improved)
+   * Body Composition & Visceral Fat Analysis Engine
+   * Deurenberg Formula for Body Fat %:
+   * Body Fat % = (1.20 × BMI) + (0.23 × Age) - (10.8 × GenderFactor) - 5.4
+   * (GenderFactor: Male = 1, Female = 0)
+   * 
+   * Visceral Fat Rating (1-59 scale):
+   * Standard bioimpedance scale rating (1-9 Normal, 10-14 High, ≥15 Dangerous)
+   */
+  calculateBodyComposition(bmi, age, gender, waistCm, inputFatPct, inputVisceralFat) {
+    let bodyFatPct = 0;
+    let visceralFatRating = 0;
+    
+    if (inputFatPct && !isNaN(parseFloat(inputFatPct)) && parseFloat(inputFatPct) > 0) {
+      bodyFatPct = parseFloat(parseFloat(inputFatPct).toFixed(1));
+    } else {
+      // Deurenberg Formula
+      const genderFactor = gender === 'Male' ? 1 : 0;
+      bodyFatPct = parseFloat(((1.20 * bmi) + (0.23 * age) - (10.8 * genderFactor) - 5.4).toFixed(1));
+      bodyFatPct = Math.max(5.0, Math.min(60.0, bodyFatPct));
+    }
+
+    if (inputVisceralFat && !isNaN(parseFloat(inputVisceralFat)) && parseFloat(inputVisceralFat) > 0) {
+      visceralFatRating = parseInt(inputVisceralFat);
+    } else {
+      // Clinical estimate from waist, BMI, age
+      let baseVF = (bmi - 20) * 0.8 + (age - 20) * 0.1;
+      if (waistCm && !isNaN(parseFloat(waistCm))) {
+        const threshold = gender === 'Male' ? 90 : 80;
+        if (parseFloat(waistCm) >= threshold) {
+          baseVF += (parseFloat(waistCm) - threshold) * 0.25;
+        }
+      }
+      visceralFatRating = Math.max(1, Math.min(30, Math.round(baseVF)));
+    }
+
+    // Body Fat Category Cutoffs
+    let fatCategory = 'Healthy Body Fat';
+    let fatBadge = 'badge-green';
+    const maleCutoffs = { low: 10, normalMax: 20, highMax: 25 };
+    const femaleCutoffs = { low: 18, normalMax: 28, highMax: 35 };
+    const cutoffs = gender === 'Male' ? maleCutoffs : femaleCutoffs;
+
+    if (bodyFatPct < cutoffs.low) {
+      fatCategory = 'Low Body Fat';
+      fatBadge = 'badge-blue';
+    } else if (bodyFatPct <= cutoffs.normalMax) {
+      fatCategory = 'Healthy Body Fat';
+      fatBadge = 'badge-green';
+    } else if (bodyFatPct <= cutoffs.highMax) {
+      fatCategory = 'Elevated Body Fat';
+      fatBadge = 'badge-yellow';
+    } else {
+      fatCategory = 'High Body Fat (Obesity Risk)';
+      fatBadge = 'badge-red';
+    }
+
+    // Visceral Fat Category (1-9 Normal, 10-14 At Risk, ≥15 High Risk)
+    let visceralCategory = 'Healthy (1–9)';
+    let visceralBadge = 'badge-green';
+    let visceralRiskText = 'Level 1–9: Healthy Visceral Fat Level';
+
+    if (visceralFatRating <= 9) {
+      visceralCategory = 'Healthy (1–9)';
+      visceralBadge = 'badge-green';
+      visceralRiskText = 'Level 1–9: Healthy Visceral Fat Level';
+    } else if (visceralFatRating <= 14) {
+      visceralCategory = 'Elevated (10–14)';
+      visceralBadge = 'badge-yellow';
+      visceralRiskText = 'Level 10–14: Elevated Visceral Fat Around Organs';
+    } else {
+      visceralCategory = 'High Risk (≥15)';
+      visceralBadge = 'badge-red';
+      visceralRiskText = 'Level ≥15: High Visceral Fat — Organ Health Risk';
+    }
+
+    // Skeletal Muscle Mass Estimate
+    const muscleMassPct = parseFloat((100 - bodyFatPct - 15).toFixed(1)); // ~15% bone/minerals/fluid
+
+    // Metabolic Age Estimate
+    let metabolicAge = age;
+    if (bmi >= 25 || visceralFatRating >= 10) {
+      metabolicAge = Math.min(80, Math.round(age + (visceralFatRating - 7) * 1.5));
+    } else if (bmi < 23 && visceralFatRating <= 7) {
+      metabolicAge = Math.max(18, Math.round(age - 3));
+    }
+
+    return {
+      bodyFatPct,
+      fatCategory,
+      fatBadge,
+      visceralFatRating,
+      visceralCategory,
+      visceralBadge,
+      visceralRiskText,
+      muscleMassPct,
+      metabolicAge
+    };
+  },
+
+  /**
+   * Complete Assessment Calculation Pipeline (v3.0 — Body Composition & Visceral Fat Added)
    */
   processAssessment(patientData) {
     const bmiData = this.calculateBMI(parseFloat(patientData.weight), parseFloat(patientData.height));
@@ -355,6 +455,14 @@ const ClinicalCalculator = {
     const gaps = this.analyzeGaps(patientData, waterData.liters);
     const ibw = this.calculateIBW(parseFloat(patientData.height), patientData.gender);
     const metabolicRisk = this.assessMetabolicRisk(patientData.waistCm, patientData.gender);
+    const bodyComp = this.calculateBodyComposition(
+      bmiData ? bmiData.bmi : 22,
+      parseInt(patientData.age),
+      patientData.gender,
+      patientData.waistCm,
+      patientData.bodyFatPct,
+      patientData.visceralFat
+    );
 
     const bmrRecommendation = `BMR is ${bmr} kcal/day (Mifflin-St Jeor resting metabolism). Maintain daily intake at/above ${bmr} kcal/day, meet ICMR protein target (${proteinData.recommendedProtein}g/day), and add 2 days/week resistance training.`;
 
@@ -371,6 +479,7 @@ const ClinicalCalculator = {
       weightTargetKg: bmiData ? bmiData.weightTargetKg : 0,
       ibw,
       metabolicRisk,
+      bodyComp,
       bmr,
       activityCalories: energyData.activityCalories,
       tdee: energyData.tdee,

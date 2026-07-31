@@ -188,9 +188,58 @@ const ReportModule = {
                 </div>
               </div>
 
-            </div>
+        </div>
+
+        <!-- SECTION 1.5: BIOIMPEDANCE BODY COMPOSITION & VISCERAL FAT RISK ANALYSIS -->
+        <div class="report-card p-3 border rounded mb-3 shadow-sm bg-slate-50">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+            <h6 class="fw-bold text-success mb-0">
+              <i class="lucide-activity me-1"></i> Body Composition & Visceral Fat Risk Analysis
+            </h6>
+            <span class="badge ${patient.bodyComp ? patient.bodyComp.visceralBadge : 'badge-green'} px-3 py-1">
+              ${patient.bodyComp ? patient.bodyComp.visceralCategory : 'Normal'}
+            </span>
           </div>
 
+          <div class="row g-2 text-center">
+            
+            <!-- BODY FAT % CARD -->
+            <div class="col-md-3 col-6">
+              <div class="p-2 border rounded bg-white h-100 shadow-xs">
+                <small class="text-muted d-block extra-small text-uppercase fw-700">🔥 Body Fat %</small>
+                <strong class="fs-4 text-danger d-block my-1">${patient.bodyComp ? patient.bodyComp.bodyFatPct : '--'} %</strong>
+                <div><span class="badge ${patient.bodyComp ? patient.bodyComp.fatBadge : 'badge-green'} extra-small">${patient.bodyComp ? patient.bodyComp.fatCategory : '--'}</span></div>
+              </div>
+            </div>
+
+            <!-- VISCERAL FAT RATING CARD (1-59 Scale) -->
+            <div class="col-md-3 col-6">
+              <div class="p-2 border rounded bg-white h-100 shadow-xs">
+                <small class="text-muted d-block extra-small text-uppercase fw-700">🫀 Visceral Fat Level</small>
+                <strong class="fs-4 text-warning-emphasis d-block my-1">Level ${patient.bodyComp ? patient.bodyComp.visceralFatRating : '--'}</strong>
+                <div><span class="badge ${patient.bodyComp ? patient.bodyComp.visceralBadge : 'badge-green'} extra-small">${patient.bodyComp ? patient.bodyComp.visceralCategory : '--'}</span></div>
+              </div>
+            </div>
+
+            <!-- SKELETAL MUSCLE % CARD -->
+            <div class="col-md-3 col-6">
+              <div class="p-2 border rounded bg-white h-100 shadow-xs">
+                <small class="text-muted d-block extra-small text-uppercase fw-700">💪 Skeletal Muscle Mass</small>
+                <strong class="fs-4 text-primary d-block my-1">${patient.bodyComp ? patient.bodyComp.muscleMassPct : '--'} %</strong>
+                <div class="extra-small text-muted">Lean Tissue Reserve</div>
+              </div>
+            </div>
+
+            <!-- METABOLIC AGE CARD -->
+            <div class="col-md-3 col-6">
+              <div class="p-2 border rounded bg-white h-100 shadow-xs">
+                <small class="text-muted d-block extra-small text-uppercase fw-700">⏳ Metabolic Age</small>
+                <strong class="fs-4 d-block my-1 ${patient.bodyComp && patient.bodyComp.metabolicAge > patient.age ? 'text-danger' : 'text-success'}">${patient.bodyComp ? patient.bodyComp.metabolicAge : patient.age} <small class="fs-6 fw-normal">yrs</small></strong>
+                <div class="extra-small text-dark">Chronological: <strong>${patient.age} yrs</strong></div>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         <!-- SECTION 2: BMR METABOLIC STATUS & GOAL DECISION FLOWCHART CARD -->
