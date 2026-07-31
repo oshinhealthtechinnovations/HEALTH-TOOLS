@@ -18,6 +18,21 @@ const AssessmentModule = {
     }
   },
 
+  convertFeetToCm() {
+    const feetEl = document.getElementById('height-feet');
+    const inchesEl = document.getElementById('height-inches');
+    const heightCmEl = document.getElementById('patient-height');
+
+    const feet = parseFloat(feetEl?.value) || 0;
+    const inches = parseFloat(inchesEl?.value) || 0;
+
+    if (feet > 0) {
+      const totalInches = (feet * 12) + inches;
+      const cm = parseFloat((totalInches * 2.54).toFixed(1));
+      if (heightCmEl) heightCmEl.value = cm;
+    }
+  },
+
   /**
    * Called by the + New Assessment button in the header.
    * Saves any in-progress draft, clears the form, and navigates to step 1.
