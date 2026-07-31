@@ -64,7 +64,6 @@ const AssessmentModule = {
       if (document.getElementById('patient-mobile')) document.getElementById('patient-mobile').value = draft.mobile || '';
       if (document.getElementById('patient-height')) document.getElementById('patient-height').value = draft.height || '';
       if (document.getElementById('patient-weight')) document.getElementById('patient-weight').value = draft.weight || '';
-      if (document.getElementById('patient-waist')) document.getElementById('patient-waist').value = draft.waistCm || '';
 
       App.showToast('Draft restored from last session.', 'info');
     } catch (e) {}

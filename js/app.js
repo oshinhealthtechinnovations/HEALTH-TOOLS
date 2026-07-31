@@ -189,6 +189,32 @@ const App = {
       this.showToast('Database wiped completely.', 'danger');
       this.switchTab('dashboard');
     }
+  },
+
+  clearCacheAndReload() {
+    if (confirm('This will clear all cached files and force-reload the latest version. Patient data will NOT be deleted. Continue?')) {
+      // 1. Unregister all Service Workers
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(r => r.unregister());
+        });
+      }
+
+      // 2. Clear all browser Cache Storage entries
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => caches.delete(name));
+        });
+      }
+
+      // 3. Clear session storage (not localStorage — patient data stays safe)
+      try { sessionStorage.clear(); } catch(e) {}
+
+      // 4. Force hard reload from server (bypass browser cache)
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 500);
+    }
   }
 };
 
