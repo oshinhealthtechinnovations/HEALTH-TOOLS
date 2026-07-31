@@ -93,6 +93,12 @@ const DatabaseManager = {
     }
 
     localStorage.setItem(DB_KEY, JSON.stringify(patients));
+
+    // Auto-sync to Google Sheets in background if configured
+    if (window.CloudSyncModule) {
+      window.CloudSyncModule.syncPatientRecord(record);
+    }
+
     return record;
   },
 

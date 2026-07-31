@@ -583,7 +583,34 @@
           </div>
 
           <div class="col-md-6">
-            <div class="card-clean p-4 h-100">
+            <div class="card-clean p-4 h-100 mb-4">
+              <h5 class="fw-bold text-success mb-3"><i data-lucide="cloud-lightning" class="me-2"></i>Google Sheets Live Auto-Sync</h5>
+              <p class="text-muted small mb-3">Automatically append every saved patient assessment as a live row in your Google Sheets spreadsheet in real-time.</p>
+
+              <form id="cloud-sync-form" onsubmit="event.preventDefault(); App.saveCloudSyncSettings();">
+                <div class="mb-3">
+                  <label class="form-label fw-600">Google Apps Script Webhook URL</label>
+                  <input type="url" id="setting-google-webhook" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+                  <div class="extra-small text-muted mt-1">Paste your Google Apps Script Web App URL here</div>
+                </div>
+
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="setting-cloud-enabled">
+                  <label class="form-check-input-label fw-600 ms-2" for="setting-cloud-enabled">Enable Live Auto-Sync on Save</label>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn btn-success fw-600 flex-grow-1 shadow-sm">
+                    <i data-lucide="save" class="me-1"></i> Save Webhook Settings
+                  </button>
+                  <button type="button" class="btn btn-outline-primary fw-600" onclick="CloudSyncModule.syncAllLocalRecords()">
+                    <i data-lucide="refresh-cw" class="me-1"></i> Sync All Local Records Now
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="card-clean p-4">
               <h5 class="fw-bold text-success mb-3"><i data-lucide="sliders" class="me-2"></i>Health Camp & Clinic Settings</h5>
               <p class="text-muted small mb-4">Customize details printed on individual patient reports.</p>
 
@@ -629,6 +656,7 @@
   <script src="js/calculator.js"></script>
   <script src="js/recommendations.js"></script>
   <script src="js/db.js"></script>
+  <script src="js/cloud_sync.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/assessment.js"></script>
   <script src="js/patients.js"></script>

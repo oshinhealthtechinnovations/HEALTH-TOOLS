@@ -133,11 +133,32 @@ const App = {
     if (document.getElementById('setting-contact')) document.getElementById('setting-contact').value = settings.contactPhone || '';
     if (document.getElementById('setting-date')) document.getElementById('setting-date').value = settings.campDate || '';
 
+    // Load Cloud Sync Config
+    if (window.CloudSyncModule) {
+      const syncConfig = CloudSyncModule.getConfig();
+      if (document.getElementById('setting-google-webhook')) document.getElementById('setting-google-webhook').value = syncConfig.googleWebhookUrl || '';
+      if (document.getElementById('setting-cloud-enabled')) document.getElementById('setting-cloud-enabled').checked = !!syncConfig.enabled;
+    }
+
     // Update total count on admin panel
     const count = DatabaseManager.getAllPatients().length;
     if (document.getElementById('admin-patient-count')) {
       document.getElementById('admin-patient-count').innerText = `${count} Records Saved`;
     }
+  },
+
+  saveCloudSyncSettings() {
+    if (!window.CloudSyncModule) return;
+    const webhookUrl = document.getElementById('setting-google-webhook')?.value.trim() || '';
+    const enabled = document.getElementById('setting-cloud-enabled')?.checked || false;
+
+    CloudSyncModule.saveConfig({
+      enabled,
+      googleWebhookUrl: webhookUrl,
+      provider: 'google'
+    });
+
+    this.showToast('Google Sheets Live Auto-Sync settings saved!', 'success');
   },
 
   triggerJSONImport() {
