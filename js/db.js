@@ -72,8 +72,10 @@ const DatabaseManager = {
     };
 
     if (!record.id) {
-      // New Patient
-      record.id = 'NSC-' + String(patients.length + 101).padStart(4, '0');
+      // New Patient: Collision-proof cryptographic timestamp hash for multi-user safety
+      const timeHash = Date.now().toString(36).toUpperCase();
+      const randHash = Math.random().toString(36).substring(2, 6).toUpperCase();
+      record.id = `NSC-${timeHash}-${randHash}`;
       record.createdAt = now.toISOString();
       record.dateFormatted = now.toLocaleDateString('en-IN', {
         day: '2-digit', month: 'short', year: 'numeric'

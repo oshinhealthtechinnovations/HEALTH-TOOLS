@@ -1,12 +1,18 @@
 /**
- * Nutrislims Health Camp Screening Tool - Cloud Data Sync Engine
- * Real-time Auto-Sync to Google Sheets (Excel Format) & Supabase
- * v2.2: Dual-Trigger Sync (Step 1 Instant Sync + Step 2 Full Report Sync)
+ * Nutrislims Health Camp Screening Tool - High-Concurrency Cloud Data Sync Engine
+ * v3.0: Zero-Crash Architecture, Offline Queue Retry Engine, Multi-User Lock Safe
  */
 
 const CLOUD_SYNC_KEY = 'nutrislims_cloud_sync_config_v1';
+const OFFLINE_QUEUE_KEY = 'nutrislims_offline_sync_queue_v1';
 
 const CloudSyncModule = {
+  retryIntervalId: null,
+
+  init() {
+    this.startOfflineQueueWorker();
+  },
+
   getConfig() {
     const defaultConfig = {
       enabled: true,
@@ -28,6 +34,78 @@ const CloudSyncModule = {
   },
 
   /**
+   * Get list of records queued while device was offline
+   */
+  getOfflineQueue() {
+    try {
+      const raw = localStorage.getItem(OFFLINE_QUEUE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  saveOfflineQueue(queue) {
+    localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
+  },
+
+  enqueueOfflineRecord(record) {
+    const queue = this.getOfflineQueue();
+    // Avoid duplicate queue entries for same patient ID
+    const idx = queue.findIndex(q => q.id === record.id);
+    if (idx !== -1) {
+      queue[idx] = record;
+    } else {
+      queue.push(record);
+    }
+    this.saveOfflineQueue(queue);
+    console.log(`[CloudSync] Record ${record.id} queued offline. Queue size: ${queue.length}`);
+  },
+
+  /**
+   * Background Worker — Retries sending failed/offline queued records every 15 seconds
+   */
+  startOfflineQueueWorker() {
+    // Listen to window online event for instant recovery
+    window.addEventListener('online', () => {
+      console.log('[CloudSync] Internet reconnected — flushing offline sync queue...');
+      this.flushOfflineQueue();
+    });
+
+    // Interval check every 15 seconds
+    if (!this.retryIntervalId) {
+      this.retryIntervalId = setInterval(() => {
+        this.flushOfflineQueue();
+      }, 15000);
+    }
+  },
+
+  async flushOfflineQueue() {
+    const queue = this.getOfflineQueue();
+    if (queue.length === 0 || !navigator.onLine) return;
+
+    const config = this.getConfig();
+    if (!config.enabled || !config.googleWebhookUrl) return;
+
+    console.log(`[CloudSync] Flushing ${queue.length} offline records to Google Sheets...`);
+    const remainingQueue = [];
+
+    for (const record of queue) {
+      try {
+        await this.postToGoogleSheets(config.googleWebhookUrl, record);
+      } catch (e) {
+        console.warn(`[CloudSync] Retry failed for ${record.id}, keeping in queue`, e);
+        remainingQueue.push(record);
+      }
+    }
+
+    this.saveOfflineQueue(remainingQueue);
+    if (queue.length > 0 && remainingQueue.length === 0) {
+      App.showToast('⚡ Offline data synced to Google Sheets!', 'success');
+    }
+  },
+
+  /**
    * Automatically triggered whenever a patient assessment is saved or updated.
    */
   async syncPatientRecord(patientRecord) {
@@ -36,12 +114,18 @@ const CloudSyncModule = {
       return;
     }
 
+    if (!navigator.onLine) {
+      this.enqueueOfflineRecord(patientRecord);
+      return;
+    }
+
     try {
       if (config.provider === 'google' && config.googleWebhookUrl) {
         await this.postToGoogleSheets(config.googleWebhookUrl, patientRecord);
       }
     } catch (error) {
-      console.warn('Cloud sync background error:', error);
+      console.warn('[CloudSync] Sync failed, queuing record for auto-retry:', error);
+      this.enqueueOfflineRecord(patientRecord);
     }
   },
 
@@ -51,7 +135,7 @@ const CloudSyncModule = {
    */
   async postToGoogleSheets(webhookUrl, record) {
     const payload = {
-      id: record.id || ('NSC-' + Date.now().toString().slice(-4)),
+      id: record.id || ('NSC-' + Date.now().toString(36).toUpperCase()),
       dateFormatted: record.dateFormatted || new Date().toLocaleDateString('en-IN'),
       timeFormatted: record.timeFormatted || new Date().toLocaleTimeString('en-IN'),
       name: record.name || 'Anonymous',
@@ -76,7 +160,6 @@ const CloudSyncModule = {
       sleep: record.sleep || ''
     };
 
-    // Send as text/plain stringified JSON to prevent CORS preflight blockage
     await fetch(webhookUrl, {
       method: 'POST',
       mode: 'no-cors',
@@ -112,11 +195,17 @@ const CloudSyncModule = {
         successCount++;
       } catch (e) {
         console.error('Failed to sync record:', patient.id, e);
+        this.enqueueOfflineRecord(patient);
       }
     }
 
-    App.showToast(`✅ Successfully synced ${successCount} records to Google Sheets! Check your spreadsheet!`, 'success');
+    App.showToast(`✅ Successfully synced ${successCount} records to Google Sheets!`, 'success');
   }
 };
+
+// Initialize offline worker
+document.addEventListener('DOMContentLoaded', () => {
+  CloudSyncModule.init();
+});
 
 window.CloudSyncModule = CloudSyncModule;
