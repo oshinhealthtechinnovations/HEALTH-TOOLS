@@ -134,39 +134,35 @@ const CloudSyncModule = {
    * Uses text/plain payload with no-cors to guarantee delivery across all browsers
    */
   async postToGoogleSheets(webhookUrl, record) {
-    const payload = {
-      id: record.id || ('NSC-' + Date.now().toString(36).toUpperCase()),
-      dateFormatted: record.dateFormatted || new Date().toLocaleDateString('en-IN'),
-      timeFormatted: record.timeFormatted || new Date().toLocaleTimeString('en-IN'),
-      name: record.name || 'Anonymous',
-      age: record.age || '',
-      gender: record.gender || 'Male',
-      mobile: record.mobile || '',
-      dietType: record.dietType || 'Pure Vegetarian',
-      medicalCondition: record.medicalCondition || 'None',
-      height: record.height || '',
-      weight: record.weight || '',
-      waistCm: record.waistCm || 'N/A',
-      bmi: record.bmi || '',
-      bmiCategory: record.bmiCategory || '',
-      bmr: record.bmr || '',
-      tdee: record.tdee || '',
-      patientGoal: record.patientGoal || 'Lose Weight',
-      proteinRequirement: record.proteinRequirement || '',
-      waterRequirement: record.waterRequirement || '',
-      activity: record.activity || '',
-      fruitVeg: record.fruitVeg || '',
-      water: record.water || '',
-      sleep: record.sleep || ''
-    };
+    const params = new URLSearchParams();
+    params.append('id', record.id || ('NSC-' + Date.now().toString(36).toUpperCase()));
+    params.append('dateFormatted', record.dateFormatted || new Date().toLocaleDateString('en-IN'));
+    params.append('timeFormatted', record.timeFormatted || new Date().toLocaleTimeString('en-IN'));
+    params.append('name', record.name || 'Anonymous');
+    params.append('age', String(record.age || ''));
+    params.append('gender', record.gender || 'Male');
+    params.append('mobile', String(record.mobile || ''));
+    params.append('dietType', record.dietType || 'Pure Vegetarian');
+    params.append('medicalCondition', record.medicalCondition || 'None');
+    params.append('height', String(record.height || ''));
+    params.append('weight', String(record.weight || ''));
+    params.append('waistCm', String(record.waistCm || 'N/A'));
+    params.append('bmi', String(record.bmi || ''));
+    params.append('bmiCategory', record.bmiCategory || '');
+    params.append('bmr', String(record.bmr || ''));
+    params.append('tdee', String(record.tdee || ''));
+    params.append('patientGoal', record.patientGoal || 'Lose Weight');
+    params.append('proteinRequirement', String(record.proteinRequirement || ''));
+    params.append('waterRequirement', String(record.waterRequirement || ''));
+    params.append('activity', record.activity || '');
+    params.append('fruitVeg', record.fruitVeg || '');
+    params.append('water', record.water || '');
+    params.append('sleep', record.sleep || '');
 
     await fetch(webhookUrl, {
       method: 'POST',
       mode: 'no-cors',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify(payload)
+      body: params
     });
   },
 
