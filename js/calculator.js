@@ -120,21 +120,33 @@ const ClinicalCalculator = {
   /**
    * Metabolic Syndrome — Abdominal Obesity Risk (WHO/IDF Criteria)
    * Male: waist ≥90 cm  |  Female: waist ≥80 cm
+   * Smart Inches Detection: Auto-converts inputs <=60 (inches) to cm (e.g. 36 in -> 91.4 cm)
    */
-  assessMetabolicRisk(waistCm, gender) {
-    if (!waistCm || isNaN(parseFloat(waistCm))) {
+  assessMetabolicRisk(waistInput, gender) {
+    if (!waistInput || isNaN(parseFloat(waistInput))) {
       return { assessed: false, risk: 'Not Measured', badge: 'badge-yellow', text: 'Waist not recorded' };
     }
-    const waist = parseFloat(waistCm);
-    const threshold = gender === 'Male' ? 90 : 80;
+    let rawValue = parseFloat(waistInput);
+    let waistCm = rawValue;
+    let isConvertedInches = false;
 
-    if (waist >= threshold) {
+    // Smart Inches Detection: If value is between 18 and 60, it was entered in inches
+    if (rawValue >= 18 && rawValue <= 60) {
+      waistCm = parseFloat((rawValue * 2.54).toFixed(1));
+      isConvertedInches = true;
+    }
+
+    const threshold = gender === 'Male' ? 90 : 80;
+    const displayStr = isConvertedInches ? `${rawValue} in (${waistCm} cm)` : `${waistCm} cm`;
+
+    if (waistCm >= threshold) {
       return {
         assessed: true,
         risk: 'Abdominal Obesity Risk',
         badge: 'badge-red',
-        text: `Waist ${waist} cm ≥ ${threshold} cm threshold — Metabolic Syndrome Risk Elevated`,
-        waist,
+        text: `Waist ${displayStr} ≥ ${threshold} cm threshold — Metabolic Syndrome Risk Elevated`,
+        waist: waistCm,
+        displayStr,
         threshold
       };
     }
@@ -142,8 +154,9 @@ const ClinicalCalculator = {
       assessed: true,
       risk: 'Normal',
       badge: 'badge-green',
-      text: `Waist ${waist} cm < ${threshold} cm — No Abdominal Obesity Risk`,
-      waist,
+      text: `Waist ${displayStr} < ${threshold} cm — No Abdominal Obesity Risk`,
+      waist: waistCm,
+      displayStr,
       threshold
     };
   },

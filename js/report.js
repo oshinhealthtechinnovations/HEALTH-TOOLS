@@ -121,7 +121,7 @@ const ReportModule = {
               ${patient.metabolicRisk && patient.metabolicRisk.assessed ? `
               <div class="p-2 rounded border text-center mt-2 ${patient.metabolicRisk.risk === 'Normal' ? 'bg-success-subtle border-success' : 'bg-danger-subtle border-danger'}">
                 <small class="fw-700 d-block extra-small ${patient.metabolicRisk.risk === 'Normal' ? 'text-success' : 'text-danger'}">
-                  Waist: ${patient.metabolicRisk.waist} cm — ${patient.metabolicRisk.risk}
+                  Waist: ${patient.metabolicRisk.displayStr || (patient.metabolicRisk.waist + ' cm')} — ${patient.metabolicRisk.risk}
                 </small>
                 <small class="extra-small text-dark">${patient.metabolicRisk.text}</small>
               </div>` : `
