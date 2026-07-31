@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nutrislims Health Camp Screening Tool — Evidence-Based Assessment</title>
+  <meta name="description" content="Nutrislims Health Camp Screening Tool: Rapid non-invasive nutrition and lifestyle assessment framework based on WHO & ICMR guidelines.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Custom Light Theme Design System CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- SheetJS (xlsx) for Local Excel Export/Import -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- html2pdf.js for Client-Side PDF Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="app-sidebar no-print">
+      <div class="brand-header">
+        <img src="assets/logo.png" alt="Nutrislims Health & Wellness Logo" class="brand-logo">
+        <h1 class="brand-title">Nutrislims</h1>
+        <p class="brand-sub">HEALTH CAMP SCREENING</p>
+      </div>
+
+      <ul class="nav-menu">
+        <li>
+          <a href="#" class="nav-tab-link active" data-tab="dashboard">
+            <i class="lucide-layout-dashboard"></i>
+            <span>Camp Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-tab-link" data-tab="assessment">
+            <i class="lucide-user-plus"></i>
+            <span>New Assessment</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-tab-link" data-tab="patients">
+            <i class="lucide-users"></i>
+            <span>Patient Directory</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-tab-link" data-tab="report">
+            <i class="lucide-file-badge"></i>
+            <span>Printable Report</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-tab-link" data-tab="admin">
+            <i class="lucide-settings"></i>
+            <span>Admin & Data Export</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="mt-auto pt-3 border-top border-slate-200">
+        <div class="d-flex align-items-center gap-2 text-muted extra-small">
+          <i class="lucide-shield-check text-success"></i>
+          <span>WHO & ICMR-NIN Guidelines</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEW AREA (FULL PAGE EXPANDED) -->
+    <main class="app-main">
+      
+      <!-- TOP HEADER BAR -->
+      <header class="d-flex justify-content-between align-items-center mb-4 no-print flex-wrap gap-2">
+        <div>
+          <h2 class="fw-extrabold mb-0 text-slate-900" style="color: #0F172A;">Nutrislims Health Camp Screening Tool</h2>
+          <p class="text-muted mb-0 small">Evidence-Based Patient Energy & Weight Consultation Framework</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-success btn-md fw-600 shadow-sm" onclick="DatabaseManager.exportToExcel()">
+            <i class="lucide-file-spreadsheet me-1"></i> Export Excel Database
+          </button>
+          <button class="btn btn-success btn-md fw-600 shadow-sm" onclick="App.switchTab('assessment')">
+            <i class="lucide-plus me-1"></i> + New Assessment
+          </button>
+        </div>
+      </header>
+
+      <!-- 1. DASHBOARD VIEW (FULL PAGE EXPANDED) -->
+      <section id="view-dashboard" class="view-section">
+        
+        <!-- STAT CARDS ROW -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-3 col-6">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="lucide-users"></i></div>
+              <div>
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Total Screened</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="lucide-calendar-check"></i></div>
+              <div>
+                <div class="stat-value" id="stat-today">0</div>
+                <div class="stat-label">Today's Assessments</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="lucide-target text-success"></i></div>
+              <div>
+                <div class="stat-value text-success" id="stat-top-goal">--</div>
+                <div class="stat-label">Top Consultation Goal</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="lucide-heart-pulse"></i></div>
+              <div>
+                <div class="stat-value" id="stat-avg-bmi">0.0</div>
+                <div class="stat-label">Average BMI</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECONDARY STATS -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-3 col-6">
+            <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm">
+              <small class="text-muted fw-600 d-block">Average Age</small>
+              <h4 class="fw-bold mb-0 text-slate-800" id="stat-avg-age">0 yrs</h4>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm">
+              <small class="text-muted fw-600 d-block">Average BMR</small>
+              <h4 class="fw-bold mb-0 text-success" id="stat-avg-bmr">0 kcal</h4>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm">
+              <small class="text-muted fw-600 d-block">Avg Protein Goal</small>
+              <h4 class="fw-bold mb-0 text-primary" id="stat-avg-protein">0 g</h4>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm">
+              <small class="text-muted fw-600 d-block">Avg Hydration Goal</small>
+              <h4 class="fw-bold mb-0 text-info" id="stat-avg-water">0.0 L</h4>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="card-clean p-3 h-100">
+              <h6 class="fw-bold text-slate-800 mb-3">Patient Consultation Goals Breakdown</h6>
+              <div style="height: 240px; position: relative;">
+                <canvas id="chart-goals-dist"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card-clean p-3 h-100">
+              <h6 class="fw-bold text-slate-800 mb-3">BMI Distribution (WHO Asian Standard)</h6>
+              <div style="height: 240px; position: relative;">
+                <canvas id="chart-bmi-dist"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card-clean p-3 h-100">
+              <h6 class="fw-bold text-slate-800 mb-3">Lifestyle Risk Factors Breakdown</h6>
+              <div style="height: 240px; position: relative;">
+                <canvas id="chart-lifestyle-breakdown"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTTOM ROW: RECENT PATIENTS & COMMON ISSUES -->
+        <div class="row g-3">
+          <div class="col-md-7">
+            <div class="card-clean p-3">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold text-slate-800 mb-0">Recent Assessments</h6>
+                <button class="btn btn-sm btn-link text-success fw-600 p-0 text-decoration-none" onclick="App.switchTab('patients')">View All Records →</button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover table-light-custom align-middle mb-0 extra-small">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Participant</th>
+                      <th>Mobile</th>
+                      <th>Patient Goal</th>
+                      <th>BMI / Category</th>
+                      <th>BMR</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboard-recent-table">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="card-clean p-3">
+              <h6 class="fw-bold text-slate-800 mb-3">Community Health Priorities (Top Risk Factors)</h6>
+              <div id="common-issues-list">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 2. NEW ASSESSMENT VIEW (WITH CUSTOM OTHER WRITE-IN OPTIONS IN ALL DROPDOWNS) -->
+      <section id="view-assessment" class="view-section" style="display: none;">
+        <div class="card-clean p-4 w-100 mx-auto">
+          <div class="text-center mb-4">
+            <h4 class="fw-bold text-slate-900 mb-1">New Participant Consultation</h4>
+            <p class="text-muted small mb-0">Evidence-Based Clinical Screening & Automatic BMI Goal Assessment</p>
+          </div>
+
+          <input type="hidden" id="patient-edit-id">
+
+          <!-- 2-STEP PROGRESS INDICATOR -->
+          <div class="step-indicator-container mb-4">
+            <div class="step-indicator active" id="step-indicator-1">1</div>
+            <div class="fw-700 text-slate-700 me-3">Patient Data & Lifestyle</div>
+            <div class="step-indicator" id="step-indicator-2">2</div>
+            <div class="fw-700 text-slate-700">Clinical Calculation & Report</div>
+          </div>
+
+          <form id="assessment-form">
+            
+            <!-- STEP 1: PATIENT REGISTRATION, ANTHROPOMETRICS & LIFESTYLE -->
+            <div id="form-step-1" class="form-step-content">
+              <h5 class="fw-bold text-success border-bottom pb-2 mb-3">Section A — Patient Registration & Demographics</h5>
+              
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label">Full Name *</label>
+                  <input type="text" id="patient-name" class="form-control" placeholder="e.g. Ramesh Kumar" required>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Age (Years) *</label>
+                  <input type="number" id="patient-age" class="form-control" min="1" max="120" placeholder="e.g. 38" required>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Gender *</label>
+                  <select id="patient-gender" class="form-select" required>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Mobile Number *</label>
+                  <input type="tel" id="patient-mobile" class="form-control" placeholder="e.g. 9826012345" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Dietary Preference *</label>
+                  <select id="patient-diet-type" class="form-select">
+                    <option value="Pure Vegetarian">Pure Vegetarian</option>
+                    <option value="Eggetarian">Eggetarian</option>
+                    <option value="Non-Vegetarian">Non-Vegetarian</option>
+                    <option value="Vegan">Vegan</option>
+                    <option value="Other">Other (Specify Custom Diet...)</option>
+                  </select>
+                  <input type="text" id="patient-diet-other" class="form-control mt-2" placeholder="Specify diet (e.g. Jain Veg, Keto...)" style="display: none;">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Known Medical Condition</label>
+                  <select id="patient-medical-condition" class="form-select">
+                    <option value="None">None / Healthy</option>
+                    <option value="Pre-diabetes">Pre-diabetes / Diabetes</option>
+                    <option value="Hypertension">High BP (Hypertension)</option>
+                    <option value="PCOS/PCOD">PCOS / PCOD</option>
+                    <option value="Thyroid">Thyroid (Hypo/Hyper)</option>
+                    <option value="High Cholesterol">High Cholesterol</option>
+                    <option value="Other">Other (Specify Medical Condition...)</option>
+                  </select>
+                  <input type="text" id="patient-medical-other" class="form-control mt-2" placeholder="Specify medical condition (e.g. Fatty Liver, Gout...)" style="display: none;">
+                </div>
+              </div>
+
+              <h5 class="fw-bold text-success border-bottom pb-2 mb-3">Section B — Anthropometrics & Measurements</h5>
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label">Height (cm) *</label>
+                  <input type="number" id="patient-height" class="form-control" placeholder="e.g. 170" step="0.1" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Weight (kg) *</label>
+                  <input type="number" id="patient-weight" class="form-control" placeholder="e.g. 72" step="0.1" required>
+                </div>
+              </div>
+
+              <h5 class="fw-bold text-success border-bottom pb-2 mb-3">Section C — Lifestyle Screening (Water Measured in Glasses)</h5>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">Physical Activity</label>
+                  <select id="lifestyle-activity" class="form-select">
+                    <option value="Never">Never (Sedentary)</option>
+                    <option value="1–2 Days/Week">1–2 Days / Week</option>
+                    <option value="≥3 Days/Week">≥3 Days / Week (Active)</option>
+                    <option value="Other">Other (Specify Activity Details...)</option>
+                  </select>
+                  <input type="text" id="lifestyle-activity-other" class="form-control mt-2" placeholder="Specify activity details..." style="display: none;">
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Fruit & Vegetable Intake</label>
+                  <select id="lifestyle-fruitveg" class="form-select">
+                    <option value="Less than 2 servings/day">Less than 2 servings/day</option>
+                    <option value="2–4 servings/day">2–4 servings/day</option>
+                    <option value="≥5 servings/day">≥5 servings/day (Adequate)</option>
+                    <option value="Other">Other (Specify Servings...)</option>
+                  </select>
+                  <input type="text" id="lifestyle-fruitveg-other" class="form-control mt-2" placeholder="Specify fruit/veg servings..." style="display: none;">
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Daily Water Intake (in Glasses/day)</label>
+                  <select id="lifestyle-water" class="form-select">
+                    <option value="1–2 Glasses/day">1–2 Glasses / day (~0.25 - 0.5 L)</option>
+                    <option value="3–4 Glasses/day">3–4 Glasses / day (~0.75 - 1.0 L)</option>
+                    <option value="5–6 Glasses/day">5–6 Glasses / day (~1.25 - 1.5 L)</option>
+                    <option value="7–8 Glasses/day" selected>7–8 Glasses / day (~1.75 - 2.0 L)</option>
+                    <option value="9–12 Glasses/day">9–12 Glasses / day (~2.25 - 3.0 L)</option>
+                    <option value="12+ Glasses/day">12+ Glasses / day (>3.0 L)</option>
+                    <option value="Other">Other (Specify Water Intake...)</option>
+                  </select>
+                  <input type="text" id="lifestyle-water-other" class="form-control mt-2" placeholder="Specify water intake..." style="display: none;">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Sleep Duration</label>
+                  <select id="lifestyle-sleep" class="form-select">
+                    <option value="Less than 6 hours">Less than 6 hours</option>
+                    <option value="6–8 hours" selected>6–8 hours</option>
+                    <option value="More than 8 hours">More than 8 hours</option>
+                    <option value="Other">Other (Specify Sleep Pattern...)</option>
+                  </select>
+                  <input type="text" id="lifestyle-sleep-other" class="form-control mt-2" placeholder="Specify sleep duration..." style="display: none;">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Sugary Drinks & Sweet Chai</label>
+                  <select id="lifestyle-sugary" class="form-select">
+                    <option value="Daily">Daily</option>
+                    <option value="Weekly">Weekly</option>
+                    <option value="Rarely/Never" selected>Rarely / Never</option>
+                    <option value="Other">Other (Specify Intake...)</option>
+                  </select>
+                  <input type="text" id="lifestyle-sugary-other" class="form-control mt-2" placeholder="Specify sugary drinks intake..." style="display: none;">
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end mt-4">
+                <button type="button" class="btn btn-success btn-lg px-5 fw-700 shadow-sm" onclick="AssessmentModule.nextStep()">
+                  Calculate Automatic BMI Goal & Review →
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 2: AUTOMATIC CLINICAL CALCULATIONS PREVIEW (FULL PAGE WIDE) & SAVE -->
+            <div id="form-step-2" class="form-step-content" style="display: none;">
+              <h5 class="fw-bold text-success border-bottom pb-2 mb-3">Automatic Clinical Calculations & Goal Assessment</h5>
+
+              <!-- FULL PAGE PREVIEW CARDS ROW -->
+              <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                  <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm h-100">
+                    <small class="text-muted fw-600 d-block">Body Mass Index (BMI)</small>
+                    <h3 class="fw-bold text-slate-900 mb-1" id="preview-bmi">0.0</h3>
+                    <span class="badge bg-secondary" id="preview-bmi-category">Pending</span>
+                    <div class="extra-small text-muted mt-2">Target Healthy Weight: <br><strong id="preview-healthy-range" class="text-success">--</strong></div>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm h-100">
+                    <small class="text-muted fw-600 d-block">Automatic Goal Aligned to BMI</small>
+                    <div class="my-1">
+                      <span class="badge bg-success-subtle text-success border border-success px-3 py-1 fs-6 fw-700" id="preview-auto-goal">
+                        🥗 Lose Weight
+                      </span>
+                    </div>
+                    <small class="extra-small text-dark d-block mt-1" id="preview-goal-desc">Automatic Goal Aligned to BMI</small>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm h-100">
+                    <small class="text-muted fw-600 d-block">Prescribed Energy & Nutrition Targets</small>
+                    <div class="extra-small text-dark mt-1">BMR (Resting): <strong id="preview-bmr" class="text-primary">0 kcal</strong></div>
+                    <div class="extra-small text-dark mt-1">Prescribed Target: <strong id="preview-weight-loss" class="text-success">0 kcal/day</strong></div>
+                    <div class="extra-small text-dark mt-1">Daily Protein Goal: <strong id="preview-protein" class="text-slate-900">0 g/day</strong></div>
+                    <div class="extra-small text-dark mt-1">Water Hydration Goal: <strong id="preview-water" class="text-info">0 L/day</strong></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-outline-secondary px-4 fw-600" onclick="AssessmentModule.prevStep()">
+                  ← Back to Patient Inputs
+                </button>
+                <button type="button" class="btn btn-success btn-lg px-5 fw-700 shadow-sm" onclick="AssessmentModule.saveAssessment()">
+                  <i class="lucide-save me-1"></i> Save Assessment & Generate Consultation Report
+                </button>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </section>
+
+      <!-- 3. PATIENT DIRECTORY VIEW -->
+      <section id="view-patients" class="view-section" style="display: none;">
+        <div class="card-clean p-3 mb-4">
+          <div class="row g-2 align-items-center">
+            <div class="col-md-4">
+              <input type="text" id="patient-search-input" class="form-control" placeholder="Search by Name, Mobile, Patient ID...">
+            </div>
+            <div class="col-md-2">
+              <select id="filter-gender" class="form-select">
+                <option value="">All Genders</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select id="filter-bmi" class="form-select">
+                <option value="">All BMI Categories</option>
+                <option value="Underweight">Underweight</option>
+                <option value="Normal Weight">Normal Weight</option>
+                <option value="Overweight (At Risk)">Overweight (At Risk)</option>
+                <option value="Obese Class I">Obese Class I</option>
+                <option value="Obese Class II">Obese Class II</option>
+              </select>
+            </div>
+            <div class="col-md-3 text-end">
+              <button class="btn btn-outline-success w-100 fw-600" onclick="DatabaseManager.exportToExcel()">
+                <i class="lucide-download me-1"></i> Export to Excel (.xlsx)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-clean p-3">
+          <div class="table-responsive">
+            <table class="table table-hover table-light-custom align-middle mb-3">
+              <thead>
+                <tr>
+                  <th>Patient ID</th>
+                  <th>Name & Date</th>
+                  <th>Age / Gender</th>
+                  <th>Mobile</th>
+                  <th>Patient Goal</th>
+                  <th>Height / Weight</th>
+                  <th>BMI Category</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="patient-table-body">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div id="patient-pagination">
+            <!-- Pagination dynamically rendered -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. PRINTABLE REPORT VIEW -->
+      <section id="view-report" class="view-section" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+          <button class="btn btn-outline-secondary btn-sm fw-600" onclick="App.switchTab('patients')">
+            ← Back to Patient Directory
+          </button>
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary btn-sm fw-600" onclick="ReportModule.printReport()">
+              <i class="lucide-printer me-1"></i> Print One-Page Report
+            </button>
+            <button class="btn btn-success btn-sm fw-600" onclick="ReportModule.downloadPDF()">
+              <i class="lucide-file-down me-1"></i> Download PDF
+            </button>
+          </div>
+        </div>
+
+        <div id="printable-report-container">
+          <!-- Populated dynamically by report.js -->
+        </div>
+      </section>
+
+      <!-- 5. ADMIN & DATA EXPORT VIEW -->
+      <section id="view-admin" class="view-section" style="display: none;">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card-clean p-4 h-100">
+              <h5 class="fw-bold text-success mb-3"><i class="lucide-database me-2"></i>Data Management & Excel Export</h5>
+              <p class="text-muted small mb-4">Export patient records for health camp reporting, research, or Microsoft Excel analysis.</p>
+
+              <div class="d-grid gap-3">
+                <button class="btn btn-success btn-lg text-start d-flex align-items-center justify-content-between shadow-sm" onclick="DatabaseManager.exportToExcel()">
+                  <div>
+                    <strong class="d-block">Export Excel Workbook (.xlsx)</strong>
+                    <small class="text-white-50">Appends all patient screening data into clean Excel rows</small>
+                  </div>
+                  <i class="lucide-file-spreadsheet fs-2"></i>
+                </button>
+
+                <button class="btn btn-outline-secondary text-start d-flex align-items-center justify-content-between" onclick="DatabaseManager.exportToCSV()">
+                  <div>
+                    <strong class="d-block">Export CSV Data File</strong>
+                    <small class="text-muted">Standard comma-separated format</small>
+                  </div>
+                  <i class="lucide-file-text fs-2"></i>
+                </button>
+
+                <button class="btn btn-outline-primary text-start d-flex align-items-center justify-content-between" onclick="DatabaseManager.exportJSONBackup()">
+                  <div>
+                    <strong class="d-block">Download Complete Database Backup (JSON)</strong>
+                    <small class="text-muted">Preserves all camp settings and patient history</small>
+                  </div>
+                  <i class="lucide-download fs-2"></i>
+                </button>
+
+                <input type="file" id="backup-file-input" style="display: none;" accept=".json" onchange="App.handleJSONImport(event)">
+                <button class="btn btn-outline-warning text-start d-flex align-items-center justify-content-between" onclick="App.triggerJSONImport()">
+                  <div>
+                    <strong class="d-block">Restore Database from Backup</strong>
+                    <small class="text-muted">Upload a previously saved JSON backup file</small>
+                  </div>
+                  <i class="lucide-upload fs-2"></i>
+                </button>
+              </div>
+
+              <hr class="my-4">
+              
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-muted small fw-600" id="admin-patient-count">0 Records Saved</span>
+                <button class="btn btn-outline-danger btn-sm fw-600" onclick="App.confirmClearAllData()">
+                  <i class="lucide-trash-2 me-1"></i> Clear All Data
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card-clean p-4 h-100">
+              <h5 class="fw-bold text-success mb-3"><i class="lucide-sliders me-2"></i>Health Camp & Clinic Settings</h5>
+              <p class="text-muted small mb-4">Customize details printed on individual patient reports.</p>
+
+              <form id="camp-settings-form">
+                <div class="mb-3">
+                  <label class="form-label">Camp Title</label>
+                  <input type="text" id="setting-camp-name" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Location / Organization</label>
+                  <input type="text" id="setting-camp-location" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Lead Dietitian Name</label>
+                  <input type="text" id="setting-dietitian" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Contact Mobile / Helpline</label>
+                  <input type="text" id="setting-contact" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Camp Date</label>
+                  <input type="date" id="setting-date" class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 fw-600 btn-lg shadow-sm">
+                  <i class="lucide-save me-1"></i> Save Settings
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="no-print"></div>
+
+  <!-- APPLICATION SCRIPTS -->
+  <script src="js/calculator.js"></script>
+  <script src="js/recommendations.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/assessment.js"></script>
+  <script src="js/patients.js"></script>
+  <script src="js/report.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
