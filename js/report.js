@@ -479,51 +479,8 @@ const ReportModule = {
 
           </div>
 
-          <!-- SECONDARY ROW: ICMR INDIAN FOOD SWAPS & EXERCISE ADVICE -->
-          <div class="row g-2">
-            <div class="col-md-7">
-              <div class="p-2 bg-slate-50 border rounded h-100">
-                <strong class="extra-small text-success d-block mb-1">🌾 ICMR Indian Food Swaps (${patient.dietType || 'Pure Vegetarian'}):</strong>
-                <div class="row g-1">
-                  ${(patient.foodSwapsList || []).map(swap => `
-                    <div class="col-12">
-                      <div class="p-1 bg-white border rounded extra-small text-dark fw-600">
-                        • ${swap}
-                      </div>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-5">
-              <div class="p-2 bg-slate-50 border rounded h-100">
-                <strong class="extra-small text-primary d-block mb-1">🏋️ WHO Prescribed Exercise Routine:</strong>
-                <div class="p-1 bg-white border rounded extra-small text-dark mb-1">
-                  <strong>Aerobic Cardio:</strong> Brisk walk 30 mins, 5 days/week (150 mins total).
-                </div>
-                <div class="p-1 bg-white border rounded extra-small text-dark">
-                  <strong>Strength & BMR Boost:</strong> 2 days/week squats, wall pushups & planks.
-                </div>
-              </div>
-            </div>
           </div>
 
-        </div>
-
-        <!-- SECTION 5: FOLLOW-UP & PROGRESS MONITORING CHECKLIST CARD -->
-        <div class="report-card p-3 border rounded mb-3 shadow-sm bg-slate-50">
-          <h6 class="fw-bold text-dark border-bottom pb-2 mb-2">
-            <i class="lucide-calendar-check me-1 text-success"></i> Follow-Up & Progress Monitoring Protocol (Review Every 2–4 Weeks)
-          </h6>
-          <div class="row g-2 extra-small text-dark text-center">
-            <div class="col-md-2 col-4"><div class="p-2 border rounded bg-white">✔ Body Weight</div></div>
-            <div class="col-md-2 col-4"><div class="p-2 border rounded bg-white">✔ BMI Index</div></div>
-            <div class="col-md-2 col-4"><div class="p-2 border rounded bg-white">✔ Waist Line</div></div>
-            <div class="col-md-2 col-4"><div class="p-2 border rounded bg-white">✔ Calorie Intake</div></div>
-            <div class="col-md-2 col-4"><div class="p-2 border rounded bg-white">✔ Protein Intake</div></div>
-            <div class="col-md-2 col-4"><div class="p-2 border rounded bg-white">✔ Sleep & Water</div></div>
-          </div>
         </div>
 
         <!-- FOOTER MEDICAL CITATIONS (ZERO ASSUMPTIONS) -->
