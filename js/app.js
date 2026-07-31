@@ -27,7 +27,11 @@ const App = {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         const tab = link.getAttribute('data-tab');
-        if (tab) this.switchTab(tab);
+        if (tab === 'assessment') {
+          AssessmentModule.startNewAssessment();
+        } else if (tab) {
+          this.switchTab(tab);
+        }
       });
     });
   },

@@ -1,14 +1,98 @@
 /**
  * Nutrislims Health Camp Screening Tool - Assessment Form Module
- * Handles Custom "Other (Specify...)" Write-In Inputs, 2-Step Validation, Live Calculations, and Save
+ * v2.1: Auto-draft save on New Assessment, full form reset, smooth UX
  */
 
 const AssessmentModule = {
   currentStep: 1,
+  _draftKey: 'nutrislims_assessment_draft',
 
   init() {
     this.bindEvents();
     this.bindOtherDropdowns();
+    this.updateStepUI();
+    // Restore any saved draft on re-visit (but NOT if editing existing patient)
+    const editId = document.getElementById('patient-edit-id');
+    if (editId && !editId.value) {
+      this.restoreDraft();
+    }
+  },
+
+  /**
+   * Called by the + New Assessment button in the header.
+   * Saves any in-progress draft, clears the form, and navigates to step 1.
+   */
+  startNewAssessment() {
+    // If there is meaningful data in the form, auto-save as draft
+    const name = document.getElementById('patient-name')?.value.trim();
+    const weight = document.getElementById('patient-weight')?.value.trim();
+    const editId = document.getElementById('patient-edit-id')?.value;
+
+    if ((name || weight) && !editId) {
+      this.saveDraft();
+      App.showToast('Draft auto-saved. Form cleared for new patient.', 'info');
+    }
+
+    this.clearForm();
+    App.switchTab('assessment');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+
+  /**
+   * Save current form values as a draft to localStorage.
+   */
+  saveDraft() {
+    try {
+      const formData = this.getFormData();
+      localStorage.setItem(this._draftKey, JSON.stringify(formData));
+    } catch (e) {}
+  },
+
+  /**
+   * Restore last saved draft into the form fields.
+   */
+  restoreDraft() {
+    try {
+      const raw = localStorage.getItem(this._draftKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      if (!draft || !draft.name) return; // Only restore if there's actual data
+
+      if (document.getElementById('patient-name')) document.getElementById('patient-name').value = draft.name || '';
+      if (document.getElementById('patient-age')) document.getElementById('patient-age').value = draft.age || '';
+      if (document.getElementById('patient-gender')) document.getElementById('patient-gender').value = draft.gender || 'Male';
+      if (document.getElementById('patient-mobile')) document.getElementById('patient-mobile').value = draft.mobile || '';
+      if (document.getElementById('patient-height')) document.getElementById('patient-height').value = draft.height || '';
+      if (document.getElementById('patient-weight')) document.getElementById('patient-weight').value = draft.weight || '';
+      if (document.getElementById('patient-waist')) document.getElementById('patient-waist').value = draft.waistCm || '';
+
+      App.showToast('Draft restored from last session.', 'info');
+    } catch (e) {}
+  },
+
+  /**
+   * Completely clear the assessment form — all fields, step indicators, other-inputs.
+   */
+  clearForm() {
+    const form = document.getElementById('assessment-form');
+    if (form) form.reset();
+
+    // Clear edit ID (ensures next save is treated as NEW patient)
+    const editIdEl = document.getElementById('patient-edit-id');
+    if (editIdEl) editIdEl.value = '';
+
+    // Hide all "Other (Specify...)" write-in fields
+    const otherInputs = document.querySelectorAll('input[id$="-other"]');
+    otherInputs.forEach(i => { i.style.display = 'none'; i.value = ''; });
+
+    // Remove any validation error highlights
+    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+    // Clear any draft in localStorage after explicit new start
+    try { localStorage.removeItem(this._draftKey); } catch(e) {}
+
+    // Reset to Step 1
+    this.currentStep = 1;
     this.updateStepUI();
   },
 
@@ -194,16 +278,7 @@ const AssessmentModule = {
   },
 
   resetForm() {
-    const form = document.getElementById('assessment-form');
-    if (form) form.reset();
-    document.getElementById('patient-edit-id').value = '';
-    
-    // Hide all other text inputs
-    const otherInputs = form.querySelectorAll('input[id$="-other"]');
-    otherInputs.forEach(i => { i.style.display = 'none'; i.value = ''; });
-
-    this.currentStep = 1;
-    this.updateStepUI();
+    this.clearForm();
   },
 
   saveAssessment() {
@@ -212,9 +287,15 @@ const AssessmentModule = {
     const formData = this.getFormData();
     const savedRecord = DatabaseManager.savePatient(formData);
 
-    App.showToast(`Assessment saved successfully! Patient ID: ${savedRecord.id}`, 'success');
-    
-    // Redirect to patient report view
+    // Clear draft after successful save
+    try { localStorage.removeItem(this._draftKey); } catch(e) {}
+
+    App.showToast(`✅ Assessment saved! Patient ID: ${savedRecord.id}`, 'success');
+
+    // Clear the form ready for the next patient
+    this.clearForm();
+
+    // Redirect to the patient's printable report view
     App.viewPatientReport(savedRecord.id);
   }
 };
