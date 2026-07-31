@@ -9,51 +9,10 @@
 const ClinicalCalculator = {
 
   /**
-   * Smart Height Converter (Handles Feet/Inches input like 55, 5.5, 5'5", or CM)
-   * 55 or 5.5 -> 5 ft 5 in -> 165.1 cm
-   * 58 or 5.8 -> 5 ft 8 in -> 172.7 cm
-   * 165 -> 165 cm
-   */
-  parseHeightCm(input) {
-    if (!input) return 0;
-    let str = String(input).trim();
-    let val = parseFloat(str);
-
-    // If input is 3 digits >= 100 (e.g. 170, 165, 155), it is already in CM
-    if (!isNaN(val) && val >= 100) {
-      return val;
-    }
-
-    // Handle 2-digit inputs like 55, 56, 57, 58, 59, 50, 51, 60, 61, 62
-    if (!isNaN(val) && val >= 40 && val <= 72) {
-      const feet = Math.floor(val / 10);
-      const inches = Math.round(val % 10);
-      const totalInches = (feet * 12) + inches;
-      return parseFloat((totalInches * 2.54).toFixed(1));
-    }
-
-    // Handle decimal inputs like 5.5, 5.8, 5'5", 5-5
-    if (str.includes('.') || str.includes("'") || str.includes("-")) {
-      const parts = str.replace("'", ".").replace("-", ".").split('.');
-      if (parts.length >= 2) {
-        const feet = parseInt(parts[0]) || 0;
-        const inches = parseInt(parts[1]) || 0;
-        if (feet >= 4 && feet <= 7 && inches < 12) {
-          const totalInches = (feet * 12) + inches;
-          return parseFloat((totalInches * 2.54).toFixed(1));
-        }
-      }
-    }
-
-    return val;
-  },
-
-  /**
    * Calculate BMI and WHO Asian Classification (WHO/IASO/IOTF 2000)
    * Fixed: Added Obese Class III (≥32.5), corrected Class II boundary (27.5–32.4)
    */
-  calculateBMI(weightKg, heightInput) {
-    const heightCm = this.parseHeightCm(heightInput);
+  calculateBMI(weightKg, heightCm) {
     if (!weightKg || !heightCm || heightCm <= 0) return null;
     const heightM = heightCm / 100;
     const bmi = parseFloat((weightKg / (heightM * heightM)).toFixed(1));
@@ -130,8 +89,7 @@ const ClinicalCalculator = {
    * Calculate BMR using Mifflin-St Jeor Equation (Am J Clin Nutr 1990)
    * Formula verified correct.
    */
-  calculateBMR(weightKg, heightInput, ageYears, gender) {
-    const heightCm = this.parseHeightCm(heightInput);
+  calculateBMR(weightKg, heightCm, ageYears, gender) {
     if (!weightKg || !heightCm || !ageYears) return 0;
     let bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * ageYears);
     if (gender === 'Male') {
@@ -147,8 +105,7 @@ const ClinicalCalculator = {
    * Male IBW: 50 kg + 2.3 kg per inch above 5 feet
    * Female IBW: 45.5 kg + 2.3 kg per inch above 5 feet
    */
-  calculateIBW(heightInput, gender) {
-    const heightCm = this.parseHeightCm(heightInput);
+  calculateIBW(heightCm, gender) {
     const heightInches = heightCm / 2.54;
     const inchesAbove5Feet = Math.max(0, heightInches - 60);
     let ibw;
@@ -163,33 +120,21 @@ const ClinicalCalculator = {
   /**
    * Metabolic Syndrome — Abdominal Obesity Risk (WHO/IDF Criteria)
    * Male: waist ≥90 cm  |  Female: waist ≥80 cm
-   * Smart Inches Detection: Auto-converts inputs <=60 (inches) to cm (e.g. 36 in -> 91.4 cm)
    */
-  assessMetabolicRisk(waistInput, gender) {
-    if (!waistInput || isNaN(parseFloat(waistInput))) {
+  assessMetabolicRisk(waistCm, gender) {
+    if (!waistCm || isNaN(parseFloat(waistCm))) {
       return { assessed: false, risk: 'Not Measured', badge: 'badge-yellow', text: 'Waist not recorded' };
     }
-    let rawValue = parseFloat(waistInput);
-    let waistCm = rawValue;
-    let isConvertedInches = false;
-
-    // Smart Inches Detection: If value is between 18 and 60, it was entered in inches
-    if (rawValue >= 18 && rawValue <= 60) {
-      waistCm = parseFloat((rawValue * 2.54).toFixed(1));
-      isConvertedInches = true;
-    }
-
+    const waist = parseFloat(waistCm);
     const threshold = gender === 'Male' ? 90 : 80;
-    const displayStr = isConvertedInches ? `${rawValue} in (${waistCm} cm)` : `${waistCm} cm`;
 
-    if (waistCm >= threshold) {
+    if (waist >= threshold) {
       return {
         assessed: true,
         risk: 'Abdominal Obesity Risk',
         badge: 'badge-red',
-        text: `Waist ${displayStr} ≥ ${threshold} cm threshold — Metabolic Syndrome Risk Elevated`,
-        waist: waistCm,
-        displayStr,
+        text: `Waist ${waist} cm ≥ ${threshold} cm threshold — Metabolic Syndrome Risk Elevated`,
+        waist,
         threshold
       };
     }
@@ -197,9 +142,8 @@ const ClinicalCalculator = {
       assessed: true,
       risk: 'Normal',
       badge: 'badge-green',
-      text: `Waist ${displayStr} < ${threshold} cm — No Abdominal Obesity Risk`,
-      waist: waistCm,
-      displayStr,
+      text: `Waist ${waist} cm < ${threshold} cm — No Abdominal Obesity Risk`,
+      waist,
       threshold
     };
   },
@@ -502,15 +446,14 @@ const ClinicalCalculator = {
    * Complete Assessment Calculation Pipeline (v3.0 — Body Composition & Visceral Fat Added)
    */
   processAssessment(patientData) {
-    const heightCm = this.parseHeightCm(patientData.height);
-    const bmiData = this.calculateBMI(parseFloat(patientData.weight), heightCm);
-    const bmr = this.calculateBMR(parseFloat(patientData.weight), heightCm, parseInt(patientData.age), patientData.gender);
+    const bmiData = this.calculateBMI(parseFloat(patientData.weight), parseFloat(patientData.height));
+    const bmr = this.calculateBMR(parseFloat(patientData.weight), parseFloat(patientData.height), parseInt(patientData.age), patientData.gender);
     const energyData = this.calculateEnergyRequirements(bmr, patientData.activity, bmiData ? bmiData.bmi : 22);
     const autoGoal = energyData.autoGoal;
     const proteinData = this.calculateProteinRequirement(parseFloat(patientData.weight), bmiData ? bmiData.category : '', autoGoal);
     const waterData = this.calculateWaterRequirement(parseFloat(patientData.weight));
     const gaps = this.analyzeGaps(patientData, waterData.liters);
-    const ibw = this.calculateIBW(heightCm, patientData.gender);
+    const ibw = this.calculateIBW(parseFloat(patientData.height), patientData.gender);
     const metabolicRisk = this.assessMetabolicRisk(patientData.waistCm, patientData.gender);
     const bodyComp = this.calculateBodyComposition(
       bmiData ? bmiData.bmi : 22,
@@ -525,7 +468,6 @@ const ClinicalCalculator = {
 
     return {
       ...patientData,
-      height: heightCm,
       patientGoal: autoGoal,
       bmi: bmiData ? bmiData.bmi : 0,
       bmiCategory: bmiData ? bmiData.category : 'N/A',

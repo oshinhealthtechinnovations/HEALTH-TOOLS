@@ -18,34 +18,24 @@ const AssessmentModule = {
     }
   },
 
-  convertFeetToCm() {
-    const feetEl = document.getElementById('height-feet');
-    const inchesEl = document.getElementById('height-inches');
-    const heightCmEl = document.getElementById('patient-height');
-
-    const feet = parseFloat(feetEl?.value) || 0;
-    const inches = parseFloat(inchesEl?.value) || 0;
-
-    if (feet > 0) {
-      const totalInches = (feet * 12) + inches;
-      const cm = parseFloat((totalInches * 2.54).toFixed(1));
-      if (heightCmEl) heightCmEl.value = cm;
-    }
-  },
-
   /**
    * Called by the + New Assessment button in the header.
    * Saves any in-progress draft, clears the form, and navigates to step 1.
    */
   startNewAssessment() {
-    // Clear any draft from memory/localStorage so new form is 100% empty
-    try { localStorage.removeItem(this._draftKey); } catch(e) {}
-    
-    // Clear all form inputs and force view back to Step 1
+    // If there is meaningful data in the form, auto-save as draft
+    const name = document.getElementById('patient-name')?.value.trim();
+    const weight = document.getElementById('patient-weight')?.value.trim();
+    const editId = document.getElementById('patient-edit-id')?.value;
+
+    if ((name || weight) && !editId) {
+      this.saveDraft();
+      App.showToast('Draft auto-saved. Form cleared for new patient.', 'info');
+    }
+
     this.clearForm();
     App.switchTab('assessment');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    App.showToast('Form cleared for new patient assessment.', 'info');
   },
 
   /**
@@ -81,27 +71,15 @@ const AssessmentModule = {
   },
 
   /**
-   * Completely clear the assessment form — all fields, step indicators, other-inputs, force Step 1.
+   * Completely clear the assessment form — all fields, step indicators, other-inputs.
    */
   clearForm() {
     const form = document.getElementById('assessment-form');
     if (form) form.reset();
 
-    // Explicitly clear all input elements
-    const fieldIds = ['patient-edit-id', 'height-feet', 'height-inches', 'patient-height', 'patient-weight', 'patient-waist', 'patient-visceral-fat', 'patient-name', 'patient-age', 'patient-mobile'];
-    fieldIds.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-
-    // Reset dropdown defaults
-    if (document.getElementById('patient-gender')) document.getElementById('patient-gender').value = 'Male';
-    if (document.getElementById('patient-diet-type')) document.getElementById('patient-diet-type').value = 'Pure Vegetarian';
-    if (document.getElementById('patient-medical-condition')) document.getElementById('patient-medical-condition').value = 'None';
-    if (document.getElementById('lifestyle-activity')) document.getElementById('lifestyle-activity').value = 'Never';
-    if (document.getElementById('lifestyle-fruitveg')) document.getElementById('lifestyle-fruitveg').value = 'Less than 2 servings/day';
-    if (document.getElementById('lifestyle-water')) document.getElementById('lifestyle-water').value = '7–8 Glasses/day';
-    if (document.getElementById('lifestyle-sleep')) document.getElementById('lifestyle-sleep').value = '6–8 hours';
+    // Clear edit ID (ensures next save is treated as NEW patient)
+    const editIdEl = document.getElementById('patient-edit-id');
+    if (editIdEl) editIdEl.value = '';
 
     // Hide all "Other (Specify...)" write-in fields
     const otherInputs = document.querySelectorAll('input[id$="-other"]');
@@ -110,10 +88,10 @@ const AssessmentModule = {
     // Remove any validation error highlights
     document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
-    // Delete draft from localStorage so old data never re-populates
+    // Clear any draft in localStorage after explicit new start
     try { localStorage.removeItem(this._draftKey); } catch(e) {}
 
-    // Force step indicator to Step 1
+    // Reset to Step 1
     this.currentStep = 1;
     this.updateStepUI();
   },
@@ -202,28 +180,6 @@ const AssessmentModule = {
         input.classList.remove('is-invalid');
       }
     });
-
-    // Realistic Height Check (50 cm - 250 cm)
-    const heightEl = document.getElementById('patient-height');
-    if (heightEl && heightEl.value) {
-      const h = parseFloat(heightEl.value);
-      if (h < 50 || h > 250) {
-        heightEl.classList.add('is-invalid');
-        App.showToast('Please enter a realistic height between 50 cm and 250 cm (e.g. 170 cm)', 'warning');
-        return false;
-      }
-    }
-
-    // Realistic Weight Check (15 kg - 300 kg)
-    const weightEl = document.getElementById('patient-weight');
-    if (weightEl && weightEl.value) {
-      const w = parseFloat(weightEl.value);
-      if (w < 15 || w > 300) {
-        weightEl.classList.add('is-invalid');
-        App.showToast('Please enter a realistic weight between 15 kg and 300 kg (e.g. 70 kg)', 'warning');
-        return false;
-      }
-    }
 
     if (!isValid) {
       App.showToast('Please fill out all required fields marked with *', 'warning');

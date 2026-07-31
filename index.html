@@ -311,42 +311,26 @@
                 </div>
               </div>
 
-              <h5 class="fw-bold text-success border-bottom pb-2 mb-3">Section B — Anthropometrics & Bioimpedance Fat Scale</h5>
+              <h5 class="fw-bold text-success border-bottom pb-2 mb-3">Section B — Anthropometrics & Bioimpedance Fat Scale (Optional)</h5>
               <div class="row g-3 mb-4">
-                
-                <div class="col-md-4">
-                  <label class="form-label d-flex justify-content-between">
-                    <span>Height *</span>
-                    <small class="text-muted extra-small">Type 165 cm OR 5'5"</small>
-                  </label>
-                  <div class="input-group">
-                    <input type="number" id="height-feet" class="form-control" placeholder="5 ft" min="3" max="8" style="max-width: 75px;" oninput="AssessmentModule.convertFeetToCm()">
-                    <span class="input-group-text px-1">ft</span>
-                    <input type="number" id="height-inches" class="form-control" placeholder="5 in" min="0" max="11" style="max-width: 75px;" oninput="AssessmentModule.convertFeetToCm()">
-                    <span class="input-group-text px-1">in</span>
-                    <input type="number" id="patient-height" class="form-control" placeholder="165.1 cm" step="0.1" required>
-                    <span class="input-group-text px-1">cm</span>
-                  </div>
-                  <div class="extra-small text-muted mt-1">Auto-converts 5 ft 5 in ➔ 165.1 cm</div>
+                <div class="col-md-3">
+                  <label class="form-label">Height (cm) *</label>
+                  <input type="number" id="patient-height" class="form-control" placeholder="e.g. 170" step="0.1" required>
                 </div>
-
                 <div class="col-md-3">
                   <label class="form-label">Weight (kg) *</label>
                   <input type="number" id="patient-weight" class="form-control" placeholder="e.g. 72" step="0.1" required>
                 </div>
-
                 <div class="col-md-3">
-                  <label class="form-label">Waist <span class="text-muted extra-small">(Inches or CM)</span></label>
-                  <input type="number" id="patient-waist" class="form-control" placeholder="e.g. 36 in or 91 cm" step="0.5" min="18" max="200">
-                  <div class="extra-small text-muted mt-1">Auto-converts 36 in ➔ 91.4 cm</div>
+                  <label class="form-label">Waist (cm) <span class="text-muted extra-small">(Metabolic)</span></label>
+                  <input type="number" id="patient-waist" class="form-control" placeholder="e.g. 88 cm" step="0.5" min="40" max="200">
+                  <div class="extra-small text-muted mt-1">Risk: ♂ ≥90 | ♀ ≥80 cm</div>
                 </div>
-
-                <div class="col-md-2">
-                  <label class="form-label">Visceral Fat <span class="text-muted extra-small">(Scale / Auto)</span></label>
-                  <input type="number" id="patient-visceral-fat" class="form-control" placeholder="Scale 1–59" min="1" max="59">
+                <div class="col-md-3">
+                  <label class="form-label">Visceral Fat Level <span class="text-muted extra-small">(Scale / Auto)</span></label>
+                  <input type="number" id="patient-visceral-fat" class="form-control" placeholder="e.g. 8 (Scale 1–59)" min="1" max="59">
                   <div class="extra-small text-muted mt-1">Normal: 1–9 | High: ≥10</div>
                 </div>
-
               </div>
 
               <h5 class="fw-bold text-success border-bottom pb-2 mb-3">Section C — Lifestyle Screening (Water Measured in Glasses)</h5>
