@@ -178,23 +178,33 @@ const ReportModule = {
 
               </div>
 
+              <!-- PRESCRIBED GOAL CALORIE INTAKE TARGET CARD -->
+              <div class="p-2 border rounded bg-success-subtle border-success text-success text-center my-2">
+                <small class="d-block fw-700 text-uppercase extra-small">🎯 Prescribed Daily Intake Target (${goal})</small>
+                <strong class="fs-5 text-success d-block">${patient.weightLossCalories} kcal/day</strong>
+                <small class="extra-small text-dark fw-600">${patient.goalDescription || 'Energy target aligned to patient goal'}</small>
+              </div>
+
               <!-- PROTEIN & WATER METRIC BADGES -->
               <div class="row text-center g-2">
                 <div class="col-6">
-                  <div class="p-1 border rounded bg-white">
+                  <div class="p-1.5 border rounded bg-white">
                     <small class="text-muted d-block extra-small">ICMR Protein Goal</small>
-                    <strong class="text-success small">${patient.proteinRequirement} g/day</strong>
-                    <div class="extra-small text-muted">(Range: ${patient.proteinRange || '--'})</div>
+                    <strong class="text-success small d-block">${patient.proteinRequirement} g/day</strong>
+                    <div class="extra-small text-muted" style="font-size: 0.68rem;">(Range: ${patient.proteinRange || '--'})</div>
                   </div>
                 </div>
                 <div class="col-6">
-                  <div class="p-1 border rounded bg-white">
+                  <div class="p-1.5 border rounded bg-white">
                     <small class="text-muted d-block extra-small">ICMR Water Goal (200ml/glass)</small>
-                    <strong class="text-info small">${patient.waterRequirement} L / ${patient.waterGlasses || targetGlasses} glasses</strong>
-                    <div class="extra-small text-muted">(35 ml × ${patient.weight} kg body weight)</div>
+                    <strong class="text-info small d-block">${patient.waterRequirement} L / ${patient.waterGlasses || targetGlasses} glasses</strong>
+                    <div class="extra-small text-muted" style="font-size: 0.68rem;">(35 ml × ${patient.weight} kg body weight)</div>
                   </div>
                 </div>
               </div>
+
+            </div>
+          </div>
 
         </div>
 
