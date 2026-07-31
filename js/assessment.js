@@ -16,7 +16,6 @@ const AssessmentModule = {
     const form = document.getElementById('assessment-form');
     if (!form) return;
 
-    // Real-time calculation triggers on input change
     const calcInputs = form.querySelectorAll('input, select');
     calcInputs.forEach(input => {
       input.addEventListener('input', () => this.updateLivePreview());
@@ -105,7 +104,6 @@ const AssessmentModule = {
   },
 
   updateStepUI() {
-    // Hide all step sections (2 steps total)
     for (let i = 1; i <= 2; i++) {
       const el = document.getElementById(`form-step-${i}`);
       const indicator = document.getElementById(`step-indicator-${i}`);
@@ -142,6 +140,7 @@ const AssessmentModule = {
       medicalCondition: getDropdownValue('patient-medical-condition', 'patient-medical-other') || 'None',
       height: document.getElementById('patient-height')?.value || '',
       weight: document.getElementById('patient-weight')?.value || '',
+      waist: document.getElementById('patient-waist')?.value || '',
       activity: getDropdownValue('lifestyle-activity', 'lifestyle-activity-other') || 'Never',
       fruitVeg: getDropdownValue('lifestyle-fruitveg', 'lifestyle-fruitveg-other') || 'Less than 2 servings/day',
       water: getDropdownValue('lifestyle-water', 'lifestyle-water-other') || '7–8 Glasses/day',
@@ -156,7 +155,6 @@ const AssessmentModule = {
 
     const processed = ClinicalCalculator.processAssessment(formData);
 
-    // Update Live UI cards
     const bmiVal = document.getElementById('preview-bmi');
     const bmiCat = document.getElementById('preview-bmi-category');
     const healthyRange = document.getElementById('preview-healthy-range');
@@ -197,7 +195,6 @@ const AssessmentModule = {
     if (form) form.reset();
     document.getElementById('patient-edit-id').value = '';
     
-    // Hide all other text inputs
     const otherInputs = form.querySelectorAll('input[id$="-other"]');
     otherInputs.forEach(i => { i.style.display = 'none'; i.value = ''; });
 
@@ -213,7 +210,6 @@ const AssessmentModule = {
 
     App.showToast(`Assessment saved successfully! Patient ID: ${savedRecord.id}`, 'success');
     
-    // Redirect to patient report view
     App.viewPatientReport(savedRecord.id);
   }
 };
