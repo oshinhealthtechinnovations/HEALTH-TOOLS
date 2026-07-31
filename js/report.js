@@ -86,31 +86,48 @@ const ReportModule = {
                 <i class="lucide-scale me-1"></i> Anthropometric Assessment (WHO Asian)
               </h6>
               <div class="row text-center my-2">
-                <div class="col-4 border-end">
+                <div class="col-3 border-end">
                   <small class="text-muted d-block">Height</small>
-                  <strong class="fs-5">${patient.height} cm</strong>
+                  <strong class="fs-6">${patient.height} cm</strong>
                 </div>
-                <div class="col-4 border-end">
+                <div class="col-3 border-end">
                   <small class="text-muted d-block">Weight</small>
-                  <strong class="fs-5">${patient.weight} kg</strong>
+                  <strong class="fs-6">${patient.weight} kg</strong>
                 </div>
-                <div class="col-4">
+                <div class="col-3 border-end">
                   <small class="text-muted d-block">BMI</small>
-                  <strong class="fs-5 text-success">${patient.bmi}</strong>
+                  <strong class="fs-6 text-success">${patient.bmi}</strong>
+                </div>
+                <div class="col-3">
+                  <small class="text-muted d-block">IBW</small>
+                  <strong class="fs-6 text-primary">${patient.ibw} kg</strong>
                 </div>
               </div>
 
-              <!-- VISUAL WEIGHT TARGET CARD -->
+              <!-- VISUAL WEIGHT TARGET & BMI CATEGORY CARD -->
               <div class="p-2 bg-slate-50 border rounded text-center mt-2">
                 <span class="badge ${patient.bmiCategoryClass} px-3 py-1 fs-6 mb-1">${patient.bmiCategory}</span>
                 <div class="extra-small text-secondary mb-1">
                   WHO Asian Range: <strong>${patient.healthyWeightRange}</strong>
+                  &nbsp;|&nbsp; Hamwi IBW: <strong>${patient.ibw} kg</strong>
                 </div>
                 <div class="p-2 rounded border text-center ${patient.bmi >= 23 ? 'bg-danger-subtle border-danger text-danger' : patient.bmi < 18.5 ? 'bg-info-subtle border-info text-info' : 'bg-success-subtle border-success text-success'}">
                   <strong class="fs-6 d-block">${patient.weightTargetText || 'Weight Target'}</strong>
-                  <small class="extra-small">Formula Target Delta</small>
+                  <small class="extra-small">${patient.bmiRiskLevel || 'Target Body Weight'}</small>
                 </div>
               </div>
+
+              <!-- METABOLIC SYNDROME RISK FLAG -->
+              ${patient.metabolicRisk && patient.metabolicRisk.assessed ? `
+              <div class="p-2 rounded border text-center mt-2 ${patient.metabolicRisk.risk === 'Normal' ? 'bg-success-subtle border-success' : 'bg-danger-subtle border-danger'}">
+                <small class="fw-700 d-block extra-small ${patient.metabolicRisk.risk === 'Normal' ? 'text-success' : 'text-danger'}">
+                  Waist: ${patient.metabolicRisk.waist} cm — ${patient.metabolicRisk.risk}
+                </small>
+                <small class="extra-small text-dark">${patient.metabolicRisk.text}</small>
+              </div>` : `
+              <div class="p-2 rounded border text-center mt-2 bg-light border-secondary">
+                <small class="extra-small text-muted">Waist Circumference: Not Measured — Recommend at next visit</small>
+              </div>`}
 
             </div>
           </div>
@@ -159,12 +176,14 @@ const ReportModule = {
                   <div class="p-1 border rounded bg-white">
                     <small class="text-muted d-block extra-small">ICMR Protein Goal</small>
                     <strong class="text-success small">${patient.proteinRequirement} g/day</strong>
+                    <div class="extra-small text-muted">(Range: ${patient.proteinRange || '--'})</div>
                   </div>
                 </div>
                 <div class="col-6">
                   <div class="p-1 border rounded bg-white">
-                    <small class="text-muted d-block extra-small">ICMR Water Goal</small>
-                    <strong class="text-info small">${patient.waterRequirement} L (${targetGlasses} glasses)</strong>
+                    <small class="text-muted d-block extra-small">ICMR Water Goal (200ml/glass)</small>
+                    <strong class="text-info small">${patient.waterRequirement} L / ${patient.waterGlasses || targetGlasses} glasses</strong>
+                    <div class="extra-small text-muted">(35 ml × ${patient.weight} kg body weight)</div>
                   </div>
                 </div>
               </div>

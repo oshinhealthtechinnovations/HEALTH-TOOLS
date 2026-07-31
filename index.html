@@ -311,7 +311,7 @@
                 </div>
               </div>
 
-              <h5 class="fw-bold text-success border-bottom pb-2 mb-3">Section B — Anthropometrics & Body Measurements</h5>
+              <h5 class="fw-bold text-success border-bottom pb-2 mb-3">Section B — Anthropometrics & Measurements</h5>
               <div class="row g-3 mb-4">
                 <div class="col-md-4">
                   <label class="form-label">Height (cm) *</label>
@@ -322,8 +322,9 @@
                   <input type="number" id="patient-weight" class="form-control" placeholder="e.g. 72" step="0.1" required>
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Waist Circumference (cm)</label>
-                  <input type="number" id="patient-waist" class="form-control" placeholder="e.g. 92" step="0.1">
+                  <label class="form-label">Waist Circumference (cm) <span class="text-muted extra-small">(Optional — Metabolic Risk)</span></label>
+                  <input type="number" id="patient-waist" class="form-control" placeholder="e.g. 88 cm" step="0.5" min="40" max="200">
+                  <div class="extra-small text-muted mt-1">Risk: ♂ ≥90 cm &nbsp;|&nbsp; ♀ ≥80 cm (WHO/IDF)</div>
                 </div>
               </div>
 
@@ -399,44 +400,18 @@
             <div id="form-step-2" class="form-step-content" style="display: none;">
               <h5 class="fw-bold text-success border-bottom pb-2 mb-3">Automatic Clinical Calculations & Goal Assessment</h5>
 
-              <!-- FULL PAGE PREVIEW CARDS ROW 1 -->
-              <div class="row g-3 mb-3">
-                <div class="col-md-3">
-                  <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm h-100">
-                    <small class="text-muted fw-600 d-block">⭐ Overall Health Score</small>
-                    <h3 class="fw-bold text-success mb-1" id="preview-health-score">-- / 100</h3>
-                    <span class="badge bg-secondary" id="preview-health-badge">Pending</span>
-                  </div>
-                </div>
-
-                <div class="col-md-3">
+              <!-- FULL PAGE PREVIEW CARDS ROW -->
+              <div class="row g-3 mb-4">
+                <div class="col-md-4">
                   <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm h-100">
                     <small class="text-muted fw-600 d-block">Body Mass Index (BMI)</small>
                     <h3 class="fw-bold text-slate-900 mb-1" id="preview-bmi">0.0</h3>
                     <span class="badge bg-secondary" id="preview-bmi-category">Pending</span>
+                    <div class="extra-small text-muted mt-2">Target Healthy Weight: <br><strong id="preview-healthy-range" class="text-success">--</strong></div>
                   </div>
                 </div>
 
-                <div class="col-md-3">
-                  <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm h-100">
-                    <small class="text-muted fw-600 d-block">Waist-to-Height Ratio (WHtR)</small>
-                    <h3 class="fw-bold text-primary mb-1" id="preview-whtr">0.00</h3>
-                    <span class="badge bg-secondary" id="preview-whtr-status">Pending</span>
-                  </div>
-                </div>
-
-                <div class="col-md-3">
-                  <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm h-100">
-                    <small class="text-muted fw-600 d-block">Estimated Body Fat %</small>
-                    <h3 class="fw-bold text-danger mb-1" id="preview-body-fat">0.0%</h3>
-                    <span class="extra-small text-muted" id="preview-fat-mass">Fat Mass: 0 kg | LBM: 0 kg</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- FULL PAGE PREVIEW CARDS ROW 2 -->
-              <div class="row g-3 mb-4">
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm h-100">
                     <small class="text-muted fw-600 d-block">Automatic Goal Aligned to BMI</small>
                     <div class="my-1">
@@ -448,7 +423,7 @@
                   </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <div class="p-3 bg-white rounded-3 border border-slate-200 shadow-sm h-100">
                     <small class="text-muted fw-600 d-block">Prescribed Energy & Nutrition Targets</small>
                     <div class="extra-small text-dark mt-1">BMR (Resting): <strong id="preview-bmr" class="text-primary">0 kcal</strong></div>
