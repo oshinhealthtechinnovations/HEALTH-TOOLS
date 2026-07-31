@@ -154,6 +154,13 @@ const AssessmentModule = {
         this.currentStep = 2;
         this.updateStepUI();
         this.updateLivePreview();
+
+        // Auto-sync Step 1 patient data to Google Sheets immediately
+        if (window.CloudSyncModule) {
+          const formData = this.getFormData();
+          const processed = ClinicalCalculator.processAssessment(formData);
+          window.CloudSyncModule.syncPatientRecord(processed);
+        }
       }
     }
   },
