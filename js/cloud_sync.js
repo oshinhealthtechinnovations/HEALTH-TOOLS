@@ -8,8 +8,8 @@ const CLOUD_SYNC_KEY = 'nutrislims_cloud_sync_config_v1';
 const CloudSyncModule = {
   getConfig() {
     const defaultConfig = {
-      enabled: false,
-      googleWebhookUrl: '',
+      enabled: true,
+      googleWebhookUrl: 'https://script.google.com/macros/s/AKfycbx_flHP41jS3CBiGiMD8VMhp7WCqpBJc9EImAkQBTaL-6fZWMLh1poD1a62n6nv7d4/exec',
       supabaseUrl: '',
       supabaseKey: '',
       provider: 'google' // 'google' or 'supabase'
