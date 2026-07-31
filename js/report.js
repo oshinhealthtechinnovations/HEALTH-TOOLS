@@ -14,22 +14,33 @@ const ReportModule = {
       return;
     }
 
-    // Auto-reprocess patient through ClinicalCalculator to guarantee ALL calculated properties exist
-    const patient = ClinicalCalculator.processAssessment(rawPatient);
+    try {
+      // Auto-reprocess patient through ClinicalCalculator to guarantee ALL calculated properties exist
+      const processed = ClinicalCalculator.processAssessment(rawPatient);
 
-    this.currentPatient = patient;
-    const settings = DatabaseManager.getCampSettings();
-    const container = document.getElementById('printable-report-container');
-    if (!container) return;
+      // Also run RecommendationEngine to guarantee foodSwapsList exists
+      const recs = RecommendationEngine.generateRecommendations(processed);
+      const patient = {
+        ...processed,
+        foodSwapsList: processed.foodSwapsList || recs.foodSwaps || [],
+        exerciseAdviceList: processed.exerciseAdviceList || recs.exerciseAdvice || [],
+        recommendationsList: processed.recommendationsList || recs.recommendations || [],
+        followUp: processed.followUp || recs.followUp || 'Annual Health Screening'
+      };
 
-    const gaps = patient.gaps || {
-      water: { current: '7-8 glasses', target: 2.5, status: 'Sufficient', badge: 'badge-green', text: 'Target Met' },
-      fruitVeg: { current: 4, target: 5, status: 'Sufficient', badge: 'badge-green', text: 'Target Met' },
-      activity: { current: 150, target: 150, status: 'Sufficient', badge: 'badge-green', text: 'Target Met' },
-      sleep: { status: 'Sufficient', badge: 'badge-green', text: 'Optimal (6–8 hours)' }
-    };
-    const targetGlasses = patient.waterGlasses || Math.round((patient.waterRequirement || 2.5) * 5);
-    const goal = patient.patientGoal || 'Lose Weight';
+      this.currentPatient = patient;
+      const settings = DatabaseManager.getCampSettings();
+      const container = document.getElementById('printable-report-container');
+      if (!container) return;
+
+      const gaps = patient.gaps || {
+        water: { current: '7-8 glasses', target: 2.5, status: 'Sufficient', badge: 'badge-green', text: 'Target Met' },
+        fruitVeg: { current: 4, target: 5, status: 'Sufficient', badge: 'badge-green', text: 'Target Met' },
+        activity: { current: 150, target: 150, status: 'Sufficient', badge: 'badge-green', text: 'Target Met' },
+        sleep: { status: 'Sufficient', badge: 'badge-green', text: 'Optimal (6–8 hours)' }
+      };
+      const targetGlasses = patient.waterGlasses || Math.round((patient.waterRequirement || 2.5) * 5);
+      const goal = patient.patientGoal || 'Lose Weight';
 
     // Goal badge icon & style
     let goalBadge = { icon: '🥗', title: 'Lose Weight', bg: 'bg-success-subtle border-success text-success' };
@@ -522,6 +533,22 @@ const ReportModule = {
         </div>
       </div>
     `;
+
+    } catch (err) {
+      console.error('Report rendering error:', err);
+      const container = document.getElementById('printable-report-container');
+      if (container) {
+        container.innerHTML = `
+          <div class="report-paper shadow-sm p-5 text-center">
+            <h4 class="text-danger">⚠️ Report Generation Error</h4>
+            <p class="text-muted">An error occurred while generating the report. Please try again.</p>
+            <pre class="text-start bg-light p-3 rounded small text-danger">${err.message}\n${err.stack}</pre>
+            <button class="btn btn-success mt-3" onclick="location.reload()">Reload & Retry</button>
+          </div>
+        `;
+      }
+      App.showToast('Report generation failed: ' + err.message, 'danger');
+    }
   },
 
   printReport() {
