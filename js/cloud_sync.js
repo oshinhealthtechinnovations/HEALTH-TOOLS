@@ -16,7 +16,7 @@ const CloudSyncModule = {
   getConfig() {
     const defaultConfig = {
       enabled: true,
-      googleWebhookUrl: 'https://script.google.com/macros/s/AKfycbx_flHP41jS3CBiGiMD8VMhp7WCqpBJc9EImAkQBTaL-6fZWMLh1poD1a62n6nv7d4/exec',
+      googleWebhookUrl: 'https://script.google.com/macros/s/AKfycbxnAxnclFY4-m8mHY2X8d-FSnRRUHH6SPFCYMyvBnWRJYAV6MjKwTjk4EcH6coCOg/exec',
       supabaseUrl: '',
       supabaseKey: '',
       provider: 'google'
