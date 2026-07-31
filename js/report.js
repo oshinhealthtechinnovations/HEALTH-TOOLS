@@ -1,7 +1,7 @@
 /**
  * Nutrislims Health Camp Screening Tool - Patient Printable Report Generator
  * 100% Formula-Driven Patient Energy & Weight Consultation Report (ICMR & WHO Standards)
- * Includes BMR Flowchart, WHtR, Body Composition (Fat %, LBM, FFMI), Health Score (0-100), Disease Predictions & Goal Timelines
+ * Includes BMR Metabolic Status & Goal Cascade Decision Flowchart
  */
 
 const ReportModule = {
@@ -19,10 +19,9 @@ const ReportModule = {
     const container = document.getElementById('printable-report-container');
     if (!container) return;
 
-    const processed = ClinicalCalculator.processAssessment(patient);
-    const gaps = processed.gaps || ClinicalCalculator.analyzeGaps(processed, processed.waterRequirement);
-    const targetGlasses = Math.round(processed.waterRequirement * 4);
-    const goal = processed.patientGoal || 'Lose Weight';
+    const gaps = patient.gaps || ClinicalCalculator.analyzeGaps(patient, patient.waterRequirement);
+    const targetGlasses = Math.round(patient.waterRequirement * 4);
+    const goal = patient.patientGoal || 'Lose Weight';
 
     // Goal badge icon & style
     let goalBadge = { icon: '🥗', title: 'Lose Weight', bg: 'bg-success-subtle border-success text-success' };
@@ -31,14 +30,10 @@ const ReportModule = {
     if (goal === 'Healthy Lifestyle') goalBadge = { icon: '❤️', title: 'Healthy Lifestyle', bg: 'bg-danger-subtle border-danger text-danger' };
 
     // Dynamic BMR Health Assessment Logic
-    const isBmrOptimal = processed.bmr >= 1400 || processed.activity !== 'Never';
+    const isBmrOptimal = patient.bmr >= 1400 || patient.activity !== 'Never';
     const bmrStatusText = isBmrOptimal ? 'HEALTHY / OPTIMAL BMR' : 'SUB-OPTIMAL BMR (BOOST NEEDED)';
     const bmrStatusBadge = isBmrOptimal ? 'badge-green' : 'badge-amber';
     const bmrStatusAdvice = isBmrOptimal ? 'Continue maintaining muscle mass & metabolic rate' : 'Focus on preserving & improving BMR through protein & resistance training';
-
-    // Severity index active indicator
-    const severityIdx = processed.severityIndex || 1;
-    const severityCategories = ['Underweight', 'Normal', 'Overweight', 'Obesity I', 'Obesity II'];
 
     container.innerHTML = `
       <div class="report-paper shadow-sm" id="report-paper-element">
@@ -57,8 +52,8 @@ const ReportModule = {
             <span class="badge bg-success-subtle text-success border border-success px-3 py-1 fw-700" style="font-size: 0.85rem;">
               PATIENT ENERGY & WEIGHT CONSULTATION
             </span>
-            <div class="mt-2 text-dark small"><strong>ID:</strong> ${processed.id}</div>
-            <div class="text-muted extra-small"><strong>Date:</strong> ${processed.dateFormatted || new Date().toLocaleDateString()}</div>
+            <div class="mt-2 text-dark small"><strong>ID:</strong> ${patient.id}</div>
+            <div class="text-muted extra-small"><strong>Date:</strong> ${patient.dateFormatted || new Date().toLocaleDateString()}</div>
           </div>
         </div>
 
@@ -66,9 +61,9 @@ const ReportModule = {
         <div class="card mb-3 bg-light text-dark border-0 shadow-sm">
           <div class="card-body p-3">
             <div class="row align-items-center text-center text-md-start">
-              <div class="col-md-3"><strong>Patient Name:</strong> <div class="fs-6 fw-bold text-success">${processed.name}</div></div>
-              <div class="col-md-2"><strong>Age / Gender:</strong> <div>${processed.age} yrs / ${processed.gender}</div></div>
-              <div class="col-md-3"><strong>Diet Preference:</strong> <div class="fw-600 text-primary">${processed.dietType || 'Pure Vegetarian'}</div></div>
+              <div class="col-md-3"><strong>Patient Name:</strong> <div class="fs-6 fw-bold text-success">${patient.name}</div></div>
+              <div class="col-md-2"><strong>Age / Gender:</strong> <div>${patient.age} yrs / ${patient.gender}</div></div>
+              <div class="col-md-3"><strong>Diet Preference:</strong> <div class="fw-600 text-primary">${patient.dietType || 'Pure Vegetarian'}</div></div>
               <div class="col-md-4 text-md-end">
                 <strong>Patient Goal:</strong>
                 <div>
@@ -81,288 +76,95 @@ const ReportModule = {
           </div>
         </div>
 
-        <!-- TOP EXECUTIVE CARDS: OVERALL HEALTH SCORE & GOAL TIMELINE -->
+        <!-- SECTION 1: ANTHROPOMETRICS & ENERGY BREAKDOWN FLOW -->
         <div class="row g-3 mb-3">
           
-          <!-- 1. OVERALL HEALTH SCORE CARD (0-100) -->
-          <div class="col-md-6">
-            <div class="report-card p-3 border rounded shadow-sm bg-slate-50 h-100">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="fw-bold text-dark mb-0">⭐ Overall Health Score</h6>
-                <span class="badge ${processed.healthScoreBadge} px-3 py-1 fs-6">${processed.healthScoreStatusText}</span>
-              </div>
-              <div class="d-flex align-items-center gap-3">
-                <div class="display-5 fw-extrabold text-success mb-0" style="line-height: 1;">
-                  ${processed.overallHealthScore}<span class="fs-6 text-muted font-normal"> / 100</span>
-                </div>
-                <div class="extra-small text-muted border-start ps-3">
-                  <strong>Evaluated Clinical Factors:</strong><br>
-                  BMI • Waist • Physical Activity • Water • Fruit/Veg • Sleep
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 8. ESTIMATED TIME TO GOAL & MOTIVATING TIMELINE -->
-          <div class="col-md-6">
-            <div class="report-card p-3 border rounded shadow-sm bg-success-subtle border-success h-100">
-              <h6 class="fw-bold text-success mb-1">⏱️ Estimated Time to Consultation Goal</h6>
-              ${processed.weightTargetKg > 0 ? `
-                <div class="d-flex align-items-center justify-content-between my-1">
-                  <div>
-                    <span class="extra-small text-dark d-block">Target Weight Delta:</span>
-                    <strong class="fs-5 text-danger">${processed.weightTargetText}</strong>
-                  </div>
-                  <div class="text-end">
-                    <span class="extra-small text-dark d-block">Expected Duration:</span>
-                    <strong class="fs-4 text-success">${processed.timeToGoalWeeks} Weeks</strong>
-                  </div>
-                </div>
-                <div class="extra-small text-dark fw-600 border-top border-success-subtle pt-1 mt-1">
-                  🎯 Safe Weight Loss Rate: <strong>0.5 kg / week (${processed.monthlyFatLoss} kg / month)</strong>
-                </div>
-              ` : `
-                <div class="py-2 text-center text-success fw-700">
-                  🎉 Patient is at Ideal Healthy Weight! Focus on Maintenance & Vitality.
-                </div>
-              `}
-            </div>
-          </div>
-
-        </div>
-
-        <!-- SECTION 1: ANTHROPOMETRICS, WHtR & BODY COMPOSITION -->
-        <div class="row g-3 mb-3">
-          
-          <!-- ANTHROPOMETRIC & WHtR CARD (WHO Asian Standards) -->
-          <div class="col-md-6">
+          <!-- ANTHROPOMETRIC CARD (WHO Asian Standards) -->
+          <div class="col-md-5">
             <div class="report-card h-100 p-3 border rounded shadow-sm">
               <h6 class="fw-bold text-success border-bottom pb-2 mb-2">
-                <i class="lucide-scale me-1"></i> Anthropometrics & Waist-to-Height Ratio (WHtR)
+                <i class="lucide-scale me-1"></i> Anthropometric Assessment (WHO Asian)
               </h6>
-              
-              <div class="row text-center my-2 g-1">
-                <div class="col-3 border-end">
-                  <small class="text-muted d-block extra-small">Height</small>
-                  <strong class="small">${processed.height} cm</strong>
+              <div class="row text-center my-2">
+                <div class="col-4 border-end">
+                  <small class="text-muted d-block">Height</small>
+                  <strong class="fs-5">${patient.height} cm</strong>
                 </div>
-                <div class="col-3 border-end">
-                  <small class="text-muted d-block extra-small">Weight</small>
-                  <strong class="small">${processed.weight} kg</strong>
+                <div class="col-4 border-end">
+                  <small class="text-muted d-block">Weight</small>
+                  <strong class="fs-5">${patient.weight} kg</strong>
                 </div>
-                <div class="col-3 border-end">
-                  <small class="text-muted d-block extra-small">BMI</small>
-                  <strong class="small text-success">${processed.bmi}</strong>
-                </div>
-                <div class="col-3">
-                  <small class="text-muted d-block extra-small">Waist</small>
-                  <strong class="small text-primary">${processed.waist ? processed.waist + ' cm' : 'N/A'}</strong>
+                <div class="col-4">
+                  <small class="text-muted d-block">BMI</small>
+                  <strong class="fs-5 text-success">${patient.bmi}</strong>
                 </div>
               </div>
 
-              <!-- 2. WHtR METRIC CARD -->
-              <div class="p-2 border rounded bg-light mb-2">
-                <div class="d-flex justify-content-between align-items-center">
-                  <strong class="extra-small text-dark">Waist-to-Height Ratio (WHtR):</strong>
-                  <span class="badge ${processed.whtrBadge} px-2 py-1">${processed.whtr ? processed.whtr : 'N/A'} — ${processed.whtrStatus}</span>
+              <!-- VISUAL WEIGHT TARGET CARD -->
+              <div class="p-2 bg-slate-50 border rounded text-center mt-2">
+                <span class="badge ${patient.bmiCategoryClass} px-3 py-1 fs-6 mb-1">${patient.bmiCategory}</span>
+                <div class="extra-small text-secondary mb-1">
+                  WHO Asian Range: <strong>${patient.healthyWeightRange}</strong>
                 </div>
-                <div class="extra-small text-muted mt-1">${processed.whtrText}</div>
-              </div>
-
-              <!-- 13. OBESITY SEVERITY STEPPER -->
-              <div class="p-2 bg-slate-50 border rounded">
-                <small class="extra-small text-muted d-block mb-1 fw-700">Obesity Severity Classification:</small>
-                <div class="d-flex justify-content-between text-center extra-small">
-                  ${severityCategories.map((cat, idx) => `
-                    <div class="px-1 py-1 border rounded ${idx === severityIdx ? 'bg-success text-white fw-bold' : 'bg-white text-muted'}" style="flex: 1; margin: 0 1px; font-size: 0.68rem;">
-                      ${cat} ${idx === severityIdx ? '✔' : ''}
-                    </div>
-                  `).join('')}
+                <div class="p-2 rounded border text-center ${patient.bmi >= 23 ? 'bg-danger-subtle border-danger text-danger' : patient.bmi < 18.5 ? 'bg-info-subtle border-info text-info' : 'bg-success-subtle border-success text-success'}">
+                  <strong class="fs-6 d-block">${patient.weightTargetText || 'Weight Target'}</strong>
+                  <small class="extra-small">Formula Target Delta</small>
                 </div>
               </div>
 
             </div>
           </div>
 
-          <!-- 3,4,5,6. CLINICAL BODY COMPOSITION ESTIMATES CARD -->
-          <div class="col-md-6">
+          <!-- VISUAL ENERGY BREAKDOWN FLOW CARD (Mifflin-St Jeor & ICMR PAL) -->
+          <div class="col-md-7">
             <div class="report-card h-100 p-3 border rounded shadow-sm">
               <h6 class="fw-bold text-success border-bottom pb-2 mb-2">
-                <i class="lucide-activity me-1"></i> Body Composition Estimates (Deurenberg Clinical)
+                <i class="lucide-flame me-1"></i> Energy Breakdown Flow (BMR + Activity = TDEE)
               </h6>
               
-              <div class="row g-2 text-center my-2">
-                <div class="col-6">
-                  <div class="p-2 border rounded bg-light">
-                    <small class="text-muted d-block extra-small">Estimated Body Fat %</small>
-                    <strong class="fs-5 text-danger">${processed.bodyFatPct}%</strong>
-                    <div class="extra-small text-muted">${processed.bodyFatCategory}</div>
-                  </div>
-                </div>
-
-                <div class="col-6">
-                  <div class="p-2 border rounded bg-light">
-                    <small class="text-muted d-block extra-small">Fat Free Mass Index (FFMI)</small>
-                    <strong class="fs-5 text-primary">${processed.ffmi}</strong>
-                    <div class="extra-small text-muted">${processed.ffmiStatus}</div>
-                  </div>
-                </div>
-
-                <div class="col-6">
-                  <div class="p-2 border rounded bg-white">
-                    <small class="text-muted d-block extra-small">Total Fat Mass</small>
-                    <strong class="small text-dark">${processed.fatMassKg} kg</strong>
-                  </div>
-                </div>
-
-                <div class="col-6">
-                  <div class="p-2 border rounded bg-white">
-                    <small class="text-muted d-block extra-small">Lean Body Mass (LBM)</small>
-                    <strong class="small text-success">${processed.leanMassKg} kg</strong>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 9,10. IDEAL WEIGHT & HEALTHY WAIST TARGETS -->
-              <div class="p-2 border rounded bg-success-subtle text-success extra-small">
-                <strong>Ideal Weight Target:</strong> ${processed.healthyWeightRange} (Diff: ${processed.weightTargetText})<br>
-                <strong>Healthy Waist Target:</strong> &lt;${processed.targetWaist} cm for ${processed.gender} (${processed.waistDiff > 0 ? '-' + processed.waistDiff + ' cm reduction needed' : 'Optimal'})
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-
-        <!-- 11,14. DASHBOARD GAUGES & ENERGY BREAKDOWN FLOW -->
-        <div class="row g-3 mb-3">
-          
-          <!-- LEFT: DASHBOARD GAUGES CARD -->
-          <div class="col-md-6">
-            <div class="report-card p-3 border rounded shadow-sm h-100">
-              <h6 class="fw-bold text-success border-bottom pb-2 mb-2">
-                <i class="lucide-sliders me-1"></i> Interactive Clinical Dashboard Gauges
-              </h6>
-
-              <!-- BMI Gauge -->
-              <div class="mb-2">
-                <div class="d-flex justify-content-between extra-small fw-600 mb-1">
-                  <span>BMI Index (${processed.bmi})</span>
-                  <span class="badge ${processed.bmiCategoryClass}">${processed.bmiCategory}</span>
-                </div>
-                <div class="custom-progress-bg">
-                  <div class="custom-progress-fill fill-green" style="width: ${Math.min(100, Math.max(15, (processed.bmi / 35) * 100))}%;"></div>
-                </div>
-              </div>
-
-              <!-- Waist Risk Gauge -->
-              <div class="mb-2">
-                <div class="d-flex justify-content-between extra-small fw-600 mb-1">
-                  <span>Waist Risk (${processed.waist ? processed.waist + ' cm' : 'N/A'})</span>
-                  <span class="badge ${processed.whtrBadge}">${processed.whtrStatus}</span>
-                </div>
-                <div class="custom-progress-bg">
-                  <div class="custom-progress-fill fill-amber" style="width: ${Math.min(100, Math.max(15, (processed.whtr / 0.7) * 100))}%;"></div>
-                </div>
-              </div>
-
-              <!-- Body Fat Gauge -->
-              <div class="mb-2">
-                <div class="d-flex justify-content-between extra-small fw-600 mb-1">
-                  <span>Body Fat % (${processed.bodyFatPct}%)</span>
-                  <span class="text-muted extra-small">${processed.bodyFatCategory}</span>
-                </div>
-                <div class="custom-progress-bg">
-                  <div class="custom-progress-fill fill-red" style="width: ${Math.min(100, Math.max(15, (processed.bodyFatPct / 45) * 100))}%;"></div>
-                </div>
-              </div>
-
-              <!-- Hydration Gauge -->
-              <div class="mb-2">
-                <div class="d-flex justify-content-between extra-small fw-600 mb-1">
-                  <span>Hydration (${gaps.water.current} / ${targetGlasses} glasses)</span>
-                  <span class="badge ${gaps.water.badge}">${gaps.water.status}</span>
-                </div>
-                <div class="custom-progress-bg">
-                  <div class="custom-progress-fill fill-blue" style="width: ${Math.min(100, (gaps.water.currentLiters / processed.waterRequirement) * 100)}%;"></div>
-                </div>
-              </div>
-
-              <!-- Protein Goal Gauge -->
-              <div>
-                <div class="d-flex justify-content-between extra-small fw-600 mb-1">
-                  <span>Protein Target (${processed.proteinRequirement} g/day)</span>
-                  <span class="text-success extra-small">ICMR RDA Goal</span>
-                </div>
-                <div class="custom-progress-bg">
-                  <div class="custom-progress-fill fill-purple" style="width: 85%;"></div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- RIGHT: 11,12. DAILY ENERGY BUDGET & MONTHLY FAT LOSS CARD -->
-          <div class="col-md-6">
-            <div class="report-card p-3 border rounded shadow-sm h-100">
-              <h6 class="fw-bold text-success border-bottom pb-2 mb-2">
-                <i class="lucide-flame me-1"></i> Daily Energy Budget & Monthly Fat Loss
-              </h6>
-
               <div class="row g-2 text-center mb-2">
+                
+                <!-- BMR CARD -->
                 <div class="col-4">
-                  <div class="p-2 border rounded bg-light">
+                  <div class="p-2 border rounded bg-light h-100">
                     <div class="extra-small text-danger fw-700">❤️ BMR</div>
-                    <strong class="fs-6 text-dark">${processed.bmr}</strong> <small class="extra-small">kcal</small>
+                    <strong class="fs-6 text-dark">${patient.bmr}</strong> <small class="extra-small">kcal/day</small>
+                    <div class="extra-small text-muted mt-1" style="font-size: 0.68rem;">Resting Metabolism</div>
                   </div>
                 </div>
 
+                <!-- ACTIVITY ENERGY CARD -->
                 <div class="col-4">
-                  <div class="p-2 border rounded bg-light">
-                    <div class="extra-small text-success fw-700">🔥 Daily Need</div>
-                    <strong class="fs-6 text-dark">${processed.tdee}</strong> <small class="extra-small">kcal</small>
+                  <div class="p-2 border rounded bg-light h-100">
+                    <div class="extra-small text-primary fw-700">+ 🚶 Activity</div>
+                    <strong class="fs-6 text-dark">${patient.activityCalories || Math.round(patient.bmr * 0.2)}</strong> <small class="extra-small">kcal/day</small>
+                    <div class="extra-small text-muted mt-1" style="font-size: 0.68rem;">ICMR PAL Energy</div>
                   </div>
                 </div>
 
+                <!-- TDEE CARD -->
                 <div class="col-4">
-                  <div class="p-2 border rounded bg-light">
-                    <div class="extra-small text-primary fw-700">🎯 Prescribed</div>
-                    <strong class="fs-6 text-dark">${processed.weightLossCalories}</strong> <small class="extra-small">kcal</small>
+                  <div class="p-2 border rounded bg-light h-100">
+                    <div class="extra-small text-success fw-700">= 🔥 TDEE</div>
+                    <strong class="fs-6 text-dark">${patient.tdee}</strong> <small class="extra-small">kcal/day</small>
+                    <div class="extra-small text-muted mt-1" style="font-size: 0.68rem;">Total Expenditure</div>
                   </div>
                 </div>
+
               </div>
 
-              <div class="p-2 border rounded bg-success-subtle text-success text-center mb-2">
-                <small class="d-block fw-700 text-uppercase extra-small">🎯 Daily Calorie Deficit Budget</small>
-                <strong class="fs-4">${processed.dailyDeficitKcal} kcal / day</strong>
-                <small class="d-block extra-small text-dark mt-1">Expected Monthly Fat Loss: <strong>${processed.monthlyFatLoss} kg / month</strong></small>
-              </div>
-
-              <!-- 15. CLINICAL DISEASE RISK PREDICTION PANEL -->
-              <h6 class="extra-small fw-bold text-dark mb-1">Clinical Disease Risk Predictions:</h6>
-              <div class="row g-1 text-center extra-small">
-                <div class="col-3">
+              <!-- PROTEIN & WATER METRIC BADGES -->
+              <div class="row text-center g-2">
+                <div class="col-6">
                   <div class="p-1 border rounded bg-white">
-                    <div class="text-muted extra-small">Type 2 Diabetes</div>
-                    <span class="badge ${processed.diseaseRisks.diabetes.badge}">${processed.diseaseRisks.diabetes.level}</span>
+                    <small class="text-muted d-block extra-small">ICMR Protein Goal</small>
+                    <strong class="text-success small">${patient.proteinRequirement} g/day</strong>
                   </div>
                 </div>
-                <div class="col-3">
+                <div class="col-6">
                   <div class="p-1 border rounded bg-white">
-                    <div class="text-muted extra-small">Hypertension</div>
-                    <span class="badge ${processed.diseaseRisks.hypertension.badge}">${processed.diseaseRisks.hypertension.level}</span>
-                  </div>
-                </div>
-                <div class="col-3">
-                  <div class="p-1 border rounded bg-white">
-                    <div class="text-muted extra-small">Heart Disease</div>
-                    <span class="badge ${processed.diseaseRisks.heartDisease.badge}">${processed.diseaseRisks.heartDisease.level}</span>
-                  </div>
-                </div>
-                <div class="col-3">
-                  <div class="p-1 border rounded bg-white">
-                    <div class="text-muted extra-small">Fatty Liver</div>
-                    <span class="badge ${processed.diseaseRisks.fattyLiver.badge}">${processed.diseaseRisks.fattyLiver.level}</span>
+                    <small class="text-muted d-block extra-small">ICMR Water Goal</small>
+                    <strong class="text-info small">${patient.waterRequirement} L (${targetGlasses} glasses)</strong>
                   </div>
                 </div>
               </div>
@@ -387,22 +189,24 @@ const ReportModule = {
 
           <div class="row g-2 align-items-center text-center">
             
+            <!-- BMR ASSESSMENT DECISION BOX -->
             <div class="col-md-4">
               <div class="p-2 border rounded bg-white h-100">
                 <strong class="extra-small text-dark d-block">BMR Metabolic Status:</strong>
-                <span class="fw-bold small text-success">${processed.bmr} kcal/day</span>
+                <span class="fw-bold small text-success">${patient.bmr} kcal/day</span>
                 <div class="extra-small text-slate-700 mt-1">${bmrStatusAdvice}</div>
               </div>
             </div>
 
             <div class="col-md-1 d-none d-md-block fs-4 text-success">➔</div>
 
+            <!-- GOAL CLINICAL CASCADE BOX -->
             <div class="col-md-7">
               <div class="bmr-cascade-box">
                 ${goal === 'Lose Weight' ? `
                   <strong class="extra-small text-success d-block text-uppercase">🥗 Weight Loss Clinical Pathway:</strong>
                   <div class="extra-small text-dark mt-1">
-                    ✓ Maintain & Elevate BMR • ✓ Eat below TDEE (${processed.weightLossCalories} kcal, bounded ≥ BMR ${processed.bmr} kcal) • ✓ High Protein (${processed.proteinRequirement}g) • ✓ Strength Training
+                    ✓ Maintain & Elevate BMR • ✓ Eat below TDEE (${patient.weightLossCalories} kcal, bounded ≥ BMR ${patient.bmr} kcal) • ✓ High Protein (${patient.proteinRequirement}g) • ✓ Strength Training
                   </div>
                   <div class="fw-700 text-success extra-small mt-1">
                     Body burns more calories ➔ Uses stored body fat ➔ Healthy Fat Loss
@@ -410,7 +214,7 @@ const ReportModule = {
                 ` : goal === 'Gain Weight' ? `
                   <strong class="extra-small text-warning-emphasis d-block text-uppercase">💪 Weight Gain Clinical Pathway:</strong>
                   <div class="extra-small text-dark mt-1">
-                    ✓ Elevate BMR & Muscle Mass • ✓ High Protein (${processed.proteinRequirement}g) • ✓ Eat above TDEE (${processed.weightLossCalories} kcal) • ✓ Resistance Training
+                    ✓ Elevate BMR & Muscle Mass • ✓ High Protein (${patient.proteinRequirement}g) • ✓ Eat above TDEE (${patient.weightLossCalories} kcal) • ✓ Resistance Training
                   </div>
                   <div class="fw-700 text-warning-emphasis extra-small mt-1">
                     BMR maintained & elevated ➔ Lean tissue synthesis ➔ Healthy Muscle Gain
@@ -418,7 +222,7 @@ const ReportModule = {
                 ` : `
                   <strong class="extra-small text-primary d-block text-uppercase">❤️ Healthy Lifestyle Clinical Pathway:</strong>
                   <div class="extra-small text-dark mt-1">
-                    ✓ Maintain Optimal BMR • ✓ Eat around TDEE (${processed.tdee} kcal) • ✓ Regular Exercise • ✓ Protein (${processed.proteinRequirement}g) • ✓ Sleep & Hydration (${targetGlasses} glasses)
+                    ✓ Maintain Optimal BMR • ✓ Eat around TDEE (${patient.tdee} kcal) • ✓ Regular Exercise • ✓ Protein (${patient.proteinRequirement}g) • ✓ Sleep & Hydration (${targetGlasses} glasses)
                   </div>
                   <div class="fw-700 text-primary extra-small mt-1">
                     Healthy Metabolism ➔ Reduced Oxidative Stress ➔ Lower Disease Risk
@@ -437,6 +241,7 @@ const ReportModule = {
           </h6>
           <div class="row g-2">
             
+            <!-- Water Intake Card -->
             <div class="col-md-3 col-6">
               <div class="p-2 border rounded bg-light">
                 <div class="d-flex justify-content-between align-items-center mb-1">
@@ -444,11 +249,12 @@ const ReportModule = {
                   <span class="badge ${gaps.water.badge}">${gaps.water.status}</span>
                 </div>
                 <div class="extra-small text-dark"><strong>Current:</strong> ${gaps.water.current}</div>
-                <div class="extra-small text-primary"><strong>Target:</strong> ${targetGlasses} glasses (${processed.waterRequirement} L)</div>
+                <div class="extra-small text-primary"><strong>Target:</strong> ${targetGlasses} glasses (${patient.waterRequirement} L)</div>
                 <div class="extra-small text-danger fw-700 mt-1">${gaps.water.text}</div>
               </div>
             </div>
 
+            <!-- Fruits & Veggies Card -->
             <div class="col-md-3 col-6">
               <div class="p-2 border rounded bg-light">
                 <div class="d-flex justify-content-between align-items-center mb-1">
@@ -461,6 +267,7 @@ const ReportModule = {
               </div>
             </div>
 
+            <!-- Physical Activity Card -->
             <div class="col-md-3 col-6">
               <div class="p-2 border rounded bg-light">
                 <div class="d-flex justify-content-between align-items-center mb-1">
@@ -473,16 +280,81 @@ const ReportModule = {
               </div>
             </div>
 
+            <!-- Sleep Duration Card -->
             <div class="col-md-3 col-6">
               <div class="p-2 border rounded bg-light">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                   <small class="text-muted fw-700">Sleep Duration</small>
                   <span class="badge ${gaps.sleep.badge}">${gaps.sleep.status}</span>
                 </div>
-                <div class="extra-small text-dark"><strong>Current:</strong> ${processed.sleep}</div>
+                <div class="extra-small text-dark"><strong>Current:</strong> ${patient.sleep}</div>
                 <div class="extra-small text-primary"><strong>Target:</strong> 6–8 hours</div>
                 <div class="extra-small text-secondary fw-700 mt-1">${gaps.sleep.text}</div>
               </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION 4: PERSONALIZED NUTRITION & EXERCISE PRESCRIPTION CARDS -->
+        <div class="report-card p-3 border rounded mb-3 shadow-sm">
+          <h6 class="fw-bold text-success border-bottom pb-2 mb-2">
+            <i class="lucide-clipboard-check me-1"></i> Personalized Nutrition & Lifestyle Action Plan (${goal})
+          </h6>
+          
+          <div class="row g-3">
+            
+            <!-- LEFT COLUMN: DAILY ACTION CARDS -->
+            <div class="col-md-6 border-end">
+              <h6 class="small fw-bold text-dark mb-2">Goal-Based Clinical Actions:</h6>
+              
+              <div class="v-card mb-2 border-start border-success border-4">
+                <strong class="d-block text-success extra-small">🎯 Calorie Strategy (${goal})</strong>
+                <span class="extra-small text-dark">Target Intake: <strong>${patient.weightLossCalories} kcal/day</strong> (${patient.goalDescription || 'Aligned to patient goal'}).</span>
+              </div>
+
+              <div class="v-card mb-2 border-start border-primary border-4">
+                <strong class="d-block text-primary extra-small">⚡ Protein Strategy (BMR Preservation)</strong>
+                <span class="extra-small text-dark">Eat <strong>${patient.proteinRequirement} g/day</strong> (~${Math.round(patient.proteinRequirement / 3)}g protein per meal) to protect BMR & lean muscle.</span>
+              </div>
+
+              <div class="v-card mb-2 border-start border-info border-4">
+                <strong class="d-block text-info extra-small">💧 Hydration Target (ICMR 35ml/kg)</strong>
+                <span class="extra-small text-dark">Drink <strong>${targetGlasses} glasses (${patient.waterRequirement} L)/day</strong> to maintain cellular hydration.</span>
+              </div>
+
+              <div class="v-card border-start border-warning border-4">
+                <strong class="d-block text-warning-emphasis extra-small">🥗 Fruits, Salads & Fiber Goal (ICMR 400g)</strong>
+                <span class="extra-small text-dark">Eat <strong>5 servings/day</strong> (2 fresh fruits + 3 bowls raw salad/cooked veggies daily).</span>
+              </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: FOOD SWAPS & EXERCISE CARDS -->
+            <div class="col-md-6">
+              <h6 class="small fw-bold text-dark mb-2">ICMR Indian Food Swaps (${patient.dietType || 'Pure Vegetarian'}):</h6>
+              
+              ${(patient.foodSwapsList || []).map(swap => `
+                <div class="v-swap-item">
+                  <span class="extra-small text-dark fw-600">${swap}</span>
+                </div>
+              `).join('')}
+
+              <h6 class="small fw-bold text-dark mb-2 mt-3">WHO Prescribed Exercise Plan:</h6>
+              <div class="v-exercise-card">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <i class="lucide-activity text-primary"></i>
+                  <strong class="extra-small text-primary">Aerobic Cardio Goal:</strong>
+                </div>
+                <div class="extra-small text-dark mb-2">Brisk walk 30 mins, 5 days/week (Target: 150 mins/week).</div>
+                
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <i class="lucide-dumbbell text-success"></i>
+                  <strong class="extra-small text-success">Strength & BMR Boost:</strong>
+                </div>
+                <div class="extra-small text-dark">Include 2 days/week bodyweight squats, wall pushups & resistance exercises.</div>
+              </div>
+
             </div>
 
           </div>
@@ -505,13 +377,11 @@ const ReportModule = {
 
         <!-- FOOTER MEDICAL CITATIONS (ZERO ASSUMPTIONS) -->
         <div class="pt-2 border-top text-center text-muted extra-small">
-          <p class="mb-1"><strong>Medical Citations:</strong> BMI & WHtR: WHO Asian Cutoffs (WHO 2000) • BMR & Body Comp: Mifflin-St Jeor (1990) & Deurenberg (1991) • Nutrition & Hydration: ICMR-NIN Guidelines (2020) • Physical Activity: WHO Guidelines (2020).</p>
+          <p class="mb-1"><strong>Medical Citations:</strong> BMI: WHO Asian Cutoffs (WHO/IASO/IOTF 2000) • BMR: Mifflin-St Jeor Equation (1990) • Nutrition & Hydration: ICMR-NIN Dietary Guidelines for Indians (2020) • Physical Activity: WHO Guidelines (2020).</p>
           <p class="mb-0">Nutrislims Health & Wellness Clinic • 1st Floor B, 109 Rajendra Nagar Main Rd, Indore, M.P. • www.nutrislims.com</p>
         </div>
       </div>
     `;
-
-    if (window.lucide) window.lucide.createIcons();
   },
 
   printReport() {
