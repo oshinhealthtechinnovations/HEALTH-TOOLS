@@ -19,6 +19,16 @@ const ReportModule = {
     const container = document.getElementById('printable-report-container');
     if (!container) return;
 
+    // Ensure all metrics exist even for older saved patient records
+    if (!patient.bodyComp && window.ClinicalCalculator) {
+      patient.bodyComp = ClinicalCalculator.calculateBodyComposition(
+        patient.bmi, parseInt(patient.age), patient.gender, patient.waistCm, patient.bodyFatPct, patient.visceralFat
+      );
+    }
+    if (!patient.metabolicRisk && window.ClinicalCalculator) {
+      patient.metabolicRisk = ClinicalCalculator.assessMetabolicRisk(patient.waistCm, patient.gender);
+    }
+
     const gaps = patient.gaps || ClinicalCalculator.analyzeGaps(patient, patient.waterRequirement);
     const targetGlasses = Math.round(patient.waterRequirement * 4);
     const goal = patient.patientGoal || 'Lose Weight';

@@ -181,6 +181,28 @@ const AssessmentModule = {
       }
     });
 
+    // Realistic Height Check (50 cm - 250 cm)
+    const heightEl = document.getElementById('patient-height');
+    if (heightEl && heightEl.value) {
+      const h = parseFloat(heightEl.value);
+      if (h < 50 || h > 250) {
+        heightEl.classList.add('is-invalid');
+        App.showToast('Please enter a realistic height between 50 cm and 250 cm (e.g. 170 cm)', 'warning');
+        return false;
+      }
+    }
+
+    // Realistic Weight Check (15 kg - 300 kg)
+    const weightEl = document.getElementById('patient-weight');
+    if (weightEl && weightEl.value) {
+      const w = parseFloat(weightEl.value);
+      if (w < 15 || w > 300) {
+        weightEl.classList.add('is-invalid');
+        App.showToast('Please enter a realistic weight between 15 kg and 300 kg (e.g. 70 kg)', 'warning');
+        return false;
+      }
+    }
+
     if (!isValid) {
       App.showToast('Please fill out all required fields marked with *', 'warning');
     }
