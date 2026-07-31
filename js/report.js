@@ -488,68 +488,6 @@ const ReportModule = {
           </div>
         </div>
 
-        <!-- SECTION 4: PERSONALIZED NUTRITION & EXERCISE PRESCRIPTION CARDS -->
-        <div class="report-card p-3 border rounded mb-3 shadow-sm">
-          <h6 class="fw-bold text-success border-bottom pb-2 mb-2">
-            <i class="lucide-clipboard-check me-1"></i> Personalized Nutrition & Lifestyle Action Plan (${goal})
-          </h6>
-          
-          <div class="row g-3">
-            
-            <div class="col-md-6 border-end">
-              <h6 class="small fw-bold text-dark mb-2">Goal-Based Clinical Actions:</h6>
-              
-              <div class="v-card mb-2 border-start border-success border-4">
-                <strong class="d-block text-success extra-small">🎯 Calorie Strategy (${goal})</strong>
-                <span class="extra-small text-dark">Target Intake: <strong>${processed.weightLossCalories} kcal/day</strong> (${processed.goalDescription || 'Aligned to patient goal'}).</span>
-              </div>
-
-              <div class="v-card mb-2 border-start border-primary border-4">
-                <strong class="d-block text-primary extra-small">⚡ Protein Strategy (BMR Preservation)</strong>
-                <span class="extra-small text-dark">Eat <strong>${processed.proteinRequirement} g/day</strong> (~${Math.round(processed.proteinRequirement / 3)}g protein per meal) to protect BMR & lean muscle.</span>
-              </div>
-
-              <div class="v-card mb-2 border-start border-info border-4">
-                <strong class="d-block text-info extra-small">💧 Hydration Target (ICMR 35ml/kg)</strong>
-                <span class="extra-small text-dark">Drink <strong>${targetGlasses} glasses (${processed.waterRequirement} L)/day</strong> to maintain cellular hydration.</span>
-              </div>
-
-              <div class="v-card border-start border-warning border-4">
-                <strong class="d-block text-warning-emphasis extra-small">🥗 Fruits, Salads & Fiber Goal (ICMR 400g)</strong>
-                <span class="extra-small text-dark">Eat <strong>5 servings/day</strong> (2 fresh fruits + 3 bowls raw salad/cooked veggies daily).</span>
-              </div>
-
-            </div>
-
-            <div class="col-md-6">
-              <h6 class="small fw-bold text-dark mb-2">ICMR Indian Food Swaps (${processed.dietType || 'Pure Vegetarian'}):</h6>
-              
-              ${(processed.foodSwapsList || []).map(swap => `
-                <div class="v-swap-item">
-                  <span class="extra-small text-dark fw-600">${swap}</span>
-                </div>
-              `).join('')}
-
-              <h6 class="small fw-bold text-dark mb-2 mt-3">WHO Prescribed Exercise Plan:</h6>
-              <div class="v-exercise-card">
-                <div class="d-flex align-items-center gap-2 mb-1">
-                  <i class="lucide-activity text-primary"></i>
-                  <strong class="extra-small text-primary">Aerobic Cardio Goal:</strong>
-                </div>
-                <div class="extra-small text-dark mb-2">Brisk walk 30 mins, 5 days/week (Target: 150 mins/week).</div>
-                
-                <div class="d-flex align-items-center gap-2 mb-1">
-                  <i class="lucide-dumbbell text-success"></i>
-                  <strong class="extra-small text-success">Strength & BMR Boost:</strong>
-                </div>
-                <div class="extra-small text-dark">Include 2 days/week bodyweight squats, wall pushups & resistance exercises.</div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-
         <!-- SECTION 5: FOLLOW-UP & PROGRESS MONITORING CHECKLIST CARD -->
         <div class="report-card p-3 border rounded mb-3 shadow-sm bg-slate-50">
           <h6 class="fw-bold text-dark border-bottom pb-2 mb-2">
