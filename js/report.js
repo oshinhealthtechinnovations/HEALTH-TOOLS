@@ -315,68 +315,122 @@ const ReportModule = {
           </div>
         </div>
 
-        <!-- SECTION 4: PERSONALIZED NUTRITION & EXERCISE PRESCRIPTION CARDS -->
+        <!-- SECTION 4: DIETITIAN CONSULTATION KPI NUMERIC CARDS & ACTION PLAN -->
         <div class="report-card p-3 border rounded mb-3 shadow-sm">
-          <h6 class="fw-bold text-success border-bottom pb-2 mb-2">
-            <i class="lucide-clipboard-check me-1"></i> Personalized Nutrition & Lifestyle Action Plan (${goal})
-          </h6>
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h6 class="fw-bold text-success mb-0">
+              <i class="lucide-clipboard-check me-1"></i> Dietitian Consultation KPI Action Plan (${goal})
+            </h6>
+            <span class="badge bg-success-subtle text-success border border-success extra-small fw-700">ICMR & WHO Clinical Standards</span>
+          </div>
           
-          <div class="row g-3">
+          <!-- 6 NUMERIC CONSULTATION METRIC CARDS GRID -->
+          <div class="row g-2 mb-3">
             
-            <!-- LEFT COLUMN: DAILY ACTION CARDS -->
-            <div class="col-md-6 border-end">
-              <h6 class="small fw-bold text-dark mb-2">Goal-Based Clinical Actions:</h6>
-              
-              <div class="v-card mb-2 border-start border-success border-4">
-                <strong class="d-block text-success extra-small">🎯 Calorie Strategy (${goal})</strong>
-                <span class="extra-small text-dark">Target Intake: <strong>${patient.weightLossCalories} kcal/day</strong> (${patient.goalDescription || 'Aligned to patient goal'}).</span>
+            <!-- CARD 1: DAILY CALORIE TARGET -->
+            <div class="col-md-4 col-6">
+              <div class="p-2.5 border rounded bg-success-subtle border-success text-center h-100">
+                <small class="text-success fw-700 d-block extra-small text-uppercase">🎯 Prescribed Energy Intake</small>
+                <div class="fs-4 fw-extrabold text-success my-1">${patient.weightLossCalories} <small class="fs-6 fw-normal">kcal/day</small></div>
+                <div class="extra-small text-dark fw-600">TDEE: ${patient.tdee} kcal &nbsp;|&nbsp; BMR Floor: ${patient.bmr} kcal</div>
+                <div class="mt-1 p-1 bg-white rounded border text-muted extra-small" style="font-size: 0.68rem;">
+                  <strong>Dietitian Note:</strong> Maintain intake at ${patient.weightLossCalories} kcal/day to target fat loss while protecting resting BMR.
+                </div>
               </div>
-
-              <div class="v-card mb-2 border-start border-primary border-4">
-                <strong class="d-block text-primary extra-small">⚡ Protein Strategy (BMR Preservation)</strong>
-                <span class="extra-small text-dark">Eat <strong>${patient.proteinRequirement} g/day</strong> (~${Math.round(patient.proteinRequirement / 3)}g protein per meal) to protect BMR & lean muscle.</span>
-              </div>
-
-              <div class="v-card mb-2 border-start border-info border-4">
-                <strong class="d-block text-info extra-small">💧 Hydration Target (ICMR 35ml/kg)</strong>
-                <span class="extra-small text-dark">Drink <strong>${targetGlasses} glasses (${patient.waterRequirement} L)/day</strong> to maintain cellular hydration.</span>
-              </div>
-
-              <div class="v-card border-start border-warning border-4">
-                <strong class="d-block text-warning-emphasis extra-small">🥗 Fruits, Salads & Fiber Goal (ICMR 400g)</strong>
-                <span class="extra-small text-dark">Eat <strong>5 servings/day</strong> (2 fresh fruits + 3 bowls raw salad/cooked veggies daily).</span>
-              </div>
-
             </div>
 
-            <!-- RIGHT COLUMN: FOOD SWAPS & EXERCISE CARDS -->
-            <div class="col-md-6">
-              <h6 class="small fw-bold text-dark mb-2">ICMR Indian Food Swaps (${patient.dietType || 'Pure Vegetarian'}):</h6>
-              
-              ${(patient.foodSwapsList || []).map(swap => `
-                <div class="v-swap-item">
-                  <span class="extra-small text-dark fw-600">${swap}</span>
+            <!-- CARD 2: DAILY PROTEIN GOAL -->
+            <div class="col-md-4 col-6">
+              <div class="p-2.5 border rounded bg-primary-subtle border-primary text-center h-100">
+                <small class="text-primary fw-700 d-block extra-small text-uppercase">⚡ Daily Protein Target</small>
+                <div class="fs-4 fw-extrabold text-primary my-1">${patient.proteinRequirement} <small class="fs-6 fw-normal">g/day</small></div>
+                <div class="extra-small text-dark fw-600">~${Math.round(patient.proteinRequirement / 3)} g protein per main meal</div>
+                <div class="mt-1 p-1 bg-white rounded border text-muted extra-small" style="font-size: 0.68rem;">
+                  <strong>Dietitian Note:</strong> Include Paneer, Moong Dal, Sattu, Sprouts or Eggs in every meal to preserve muscle mass.
                 </div>
-              `).join('')}
-
-              <h6 class="small fw-bold text-dark mb-2 mt-3">WHO Prescribed Exercise Plan:</h6>
-              <div class="v-exercise-card">
-                <div class="d-flex align-items-center gap-2 mb-1">
-                  <i class="lucide-activity text-primary"></i>
-                  <strong class="extra-small text-primary">Aerobic Cardio Goal:</strong>
-                </div>
-                <div class="extra-small text-dark mb-2">Brisk walk 30 mins, 5 days/week (Target: 150 mins/week).</div>
-                
-                <div class="d-flex align-items-center gap-2 mb-1">
-                  <i class="lucide-dumbbell text-success"></i>
-                  <strong class="extra-small text-success">Strength & BMR Boost:</strong>
-                </div>
-                <div class="extra-small text-dark">Include 2 days/week bodyweight squats, wall pushups & resistance exercises.</div>
               </div>
+            </div>
 
+            <!-- CARD 3: DAILY WATER HYDRATION -->
+            <div class="col-md-4 col-6">
+              <div class="p-2.5 border rounded bg-info-subtle border-info text-center h-100">
+                <small class="text-info fw-700 d-block extra-small text-uppercase">💧 Daily Hydration Target</small>
+                <div class="fs-4 fw-extrabold text-info my-1">${patient.waterRequirement} <small class="fs-6 fw-normal">L/day</small></div>
+                <div class="extra-small text-dark fw-600">${patient.waterGlasses || targetGlasses} glasses of 200 ml / day</div>
+                <div class="mt-1 p-1 bg-white rounded border text-muted extra-small" style="font-size: 0.68rem;">
+                  <strong>Dietitian Note:</strong> Drink 1 glass water every 1.5 hours to optimize cellular metabolism & fat oxidation.
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 4: FRUITS & FIBER GOAL -->
+            <div class="col-md-4 col-6">
+              <div class="p-2.5 border rounded bg-warning-subtle border-warning text-center h-100">
+                <small class="text-warning-emphasis fw-700 d-block extra-small text-uppercase">🥗 Fruits, Salad & Fiber</small>
+                <div class="fs-4 fw-extrabold text-warning-emphasis my-1">5 <small class="fs-6 fw-normal">servings/day</small></div>
+                <div class="extra-small text-dark fw-600">2 Fresh Fruits + 3 Bowls Raw Salad (400g)</div>
+                <div class="mt-1 p-1 bg-white rounded border text-muted extra-small" style="font-size: 0.68rem;">
+                  <strong>Dietitian Note:</strong> Eat 1 bowl raw salad before lunch & dinner to control glucose spikes & satiety.
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 5: PHYSICAL ACTIVITY -->
+            <div class="col-md-4 col-6">
+              <div class="p-2.5 border rounded bg-purple-subtle border-purple text-center h-100" style="background-color: #F5F3FF; border: 1px solid #C4B5FD;">
+                <small class="text-purple fw-700 d-block extra-small text-uppercase" style="color: #7C3AED;">🏃 Weekly Activity Goal</small>
+                <div class="fs-4 fw-extrabold my-1" style="color: #7C3AED;">150 <small class="fs-6 fw-normal">mins/week</small></div>
+                <div class="extra-small text-dark fw-600">30 mins × 5 days (Brisk Walk + Resistance)</div>
+                <div class="mt-1 p-1 bg-white rounded border text-muted extra-small" style="font-size: 0.68rem;">
+                  <strong>Dietitian Note:</strong> 30-min brisk walk 5 days/wk + 2 days bodyweight squats/pushups to elevate BMR.
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 6: EXPECTED TRANSFORMATION PACE -->
+            <div class="col-md-4 col-6">
+              <div class="p-2.5 border rounded bg-danger-subtle border-danger text-center h-100">
+                <small class="text-danger fw-700 d-block extra-small text-uppercase">⚖️ Safe Weight Target Pace</small>
+                <div class="fs-4 fw-extrabold text-danger my-1">${patient.patientGoal === 'Lose Weight' ? '~1.5 – 2.0' : patient.patientGoal === 'Gain Weight' ? '~1.0 – 1.5' : 'Stable'} <small class="fs-6 fw-normal">kg/month</small></div>
+                <div class="extra-small text-dark fw-600">WHO Safe Clinical Transformation Pace</div>
+                <div class="mt-1 p-1 bg-white rounded border text-muted extra-small" style="font-size: 0.68rem;">
+                  <strong>Dietitian Note:</strong> Realistic & sustainable progress pace preventing fatigue, hair loss & BMR drop.
+                </div>
+              </div>
             </div>
 
           </div>
+
+          <!-- SECONDARY ROW: ICMR INDIAN FOOD SWAPS & EXERCISE ADVICE -->
+          <div class="row g-2">
+            <div class="col-md-7">
+              <div class="p-2 bg-slate-50 border rounded h-100">
+                <strong class="extra-small text-success d-block mb-1">🌾 ICMR Indian Food Swaps (${patient.dietType || 'Pure Vegetarian'}):</strong>
+                <div class="row g-1">
+                  ${(patient.foodSwapsList || []).map(swap => `
+                    <div class="col-12">
+                      <div class="p-1 bg-white border rounded extra-small text-dark fw-600">
+                        • ${swap}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="p-2 bg-slate-50 border rounded h-100">
+                <strong class="extra-small text-primary d-block mb-1">🏋️ WHO Prescribed Exercise Routine:</strong>
+                <div class="p-1 bg-white border rounded extra-small text-dark mb-1">
+                  <strong>Aerobic Cardio:</strong> Brisk walk 30 mins, 5 days/week (150 mins total).
+                </div>
+                <div class="p-1 bg-white border rounded extra-small text-dark">
+                  <strong>Strength & BMR Boost:</strong> 2 days/week squats, wall pushups & planks.
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- SECTION 5: FOLLOW-UP & PROGRESS MONITORING CHECKLIST CARD -->
